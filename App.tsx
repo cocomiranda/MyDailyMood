@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { EMOTIONS, MoodStats, EmotionData } from './types'
-import { saveMoodEntry, getMoodEntries, calculateStats } from './utils/moodUtils'
+import { saveMoodEntry, getMoodEntries, calculateStats, hasEntryForToday } from './utils/moodUtils'
 import './App.css'
 
 // Define bubble positions in color-grouped patterns
@@ -50,8 +50,19 @@ function App() {
   }, [])
 
   const handleEmotionClick = (emotion: string) => {
-    saveMoodEntry(emotion)
     const entries = getMoodEntries()
+    
+    if (hasEntryForToday(entries)) {
+      alert("You've already recorded your mood for today. Come back tomorrow to log your next one")
+      return
+    }
+
+    const newEntry = {
+      emotion,
+      timestamp: new Date().toISOString(),
+    }
+
+    saveMoodEntry(emotion)
     setStats(calculateStats(entries))
   }
 

@@ -89,76 +89,69 @@ function App() {
 
   return (
     <div className="app">
-      <div className="header">
+      <header className="header">
         <h1 className="app-title">MyDailyMood</h1>
         <p className="app-tagline">Little check-ins, big self-care.</p>
-      </div>
-      <div className="date-display">
-        {formatDate(currentDate)}
-      </div>
-      
-      <div className="emotion-bubbles">
-        {EMOTIONS.map((emotion: EmotionData, index: number) => {
-          const layout = BUBBLE_LAYOUTS[index] || BUBBLE_LAYOUTS[0]
-          const delay = (index * 0.2) % 2;
-          return (
-            <button
-              key={emotion.name}
-              className="emotion-bubble"
-              style={{ 
-                backgroundColor: emotion.color,
-                color: isLightColor(emotion.color) ? '#000' : '#fff',
-                left: `${layout.x - 50}px`,
-                top: `${layout.y - 50}px`,
-                animationDelay: `${delay}s`
-              }}
-              onClick={() => handleEmotionClick(emotion.name)}
-            >
-              <span className="emotion-text">{emotion.name}</span>
-            </button>
-          )
-        })}
-      </div>
-
+        <p className="date">{formatDate(new Date())}</p>
+      </header>
       <div className="content-wrapper">
-        <div className="stats-controls">
-          <button
-            className={selectedPeriod === 'week' ? 'active' : ''}
-            onClick={() => setSelectedPeriod('week')}
-          >
-            Week
-          </button>
-          <button
-            className={selectedPeriod === 'month' ? 'active' : ''}
-            onClick={() => setSelectedPeriod('month')}
-          >
-            Month
-          </button>
-          <button
-            className={selectedPeriod === 'year' ? 'active' : ''}
-            onClick={() => setSelectedPeriod('year')}
-          >
-            Year
-          </button>
+        <div className="emotion-bubbles">
+          {EMOTIONS.map((emotion, index) => (
+            <button
+              key={emotion}
+              className="emotion-bubble"
+              style={{
+                '--animation-order': index,
+                backgroundColor: getEmotionColor(emotion),
+                left: `${BUBBLE_LAYOUTS[index].x}px`,
+                top: `${BUBBLE_LAYOUTS[index].y}px`,
+              } as React.CSSProperties}
+              onClick={() => handleEmotionClick(emotion)}
+            >
+              {emotion}
+            </button>
+          ))}
         </div>
-
-        {selectedPeriod && (
-          <div className="stats-display">
-            <h2>Statistics for the {selectedPeriod}</h2>
-            <div className="stats-grid">
-              {getSortedEmotions().map(({ name, color, count }) => (
-                <div 
-                  key={name} 
-                  className="stat-item"
-                  data-emotion={name}
-                >
-                  <span className="emotion">{name}</span>
-                  <span className="count">{count}</span>
-                </div>
-              ))}
-            </div>
+        <div className="stats-display">
+          <div className="stats-controls">
+            <button
+              className={selectedPeriod === 'week' ? 'active' : ''}
+              onClick={() => setSelectedPeriod('week')}
+            >
+              Week
+            </button>
+            <button
+              className={selectedPeriod === 'month' ? 'active' : ''}
+              onClick={() => setSelectedPeriod('month')}
+            >
+              Month
+            </button>
+            <button
+              className={selectedPeriod === 'year' ? 'active' : ''}
+              onClick={() => setSelectedPeriod('year')}
+            >
+              Year
+            </button>
           </div>
-        )}
+
+          {selectedPeriod && (
+            <div className="stats-display">
+              <h2>Statistics for the {selectedPeriod}</h2>
+              <div className="stats-grid">
+                {getSortedEmotions().map(({ name, color, count }) => (
+                  <div 
+                    key={name} 
+                    className="stat-item"
+                    data-emotion={name}
+                  >
+                    <span className="emotion">{name}</span>
+                    <span className="count">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

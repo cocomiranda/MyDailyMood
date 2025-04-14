@@ -6,28 +6,28 @@ import './App.css'
 // Define bubble positions in color-grouped patterns
 const BUBBLE_LAYOUTS = [
   // Reds/Oranges (top)
-  { x: 300, y: 200 },  // Hopeful
-  { x: 380, y: 180 },  // Confident
-  { x: 280, y: 260 },  // Tense
-  { x: 360, y: 260 },  // Uneasy
+  { x: 180, y: 60 },    // Hopeful
+  { x: 260, y: 50 },    // Confident
+  { x: 100, y: 80 },    // Tense
+  { x: 180, y: 120 },   // Uneasy
 
   // Yellows (top-right)
-  { x: 460, y: 180 },  // Cheerful
-  { x: 500, y: 240 },  // Curious
-  { x: 440, y: 300 },  // Pleasant
-  { x: 380, y: 320 },  // Pleased
-  { x: 460, y: 360 },  // Playful
+  { x: 300, y: 90 },    // Cheerful
+  { x: 340, y: 160 },   // Curious
+  { x: 280, y: 200 },   // Pleasant
+  { x: 220, y: 160 },   // Pleased
+  { x: 300, y: 240 },   // Playful
 
   // Blues (bottom-left)
-  { x: 280, y: 380 },  // Bored
-  { x: 240, y: 320 },  // Tired
-  { x: 320, y: 440 },  // Fatigued
+  { x: 80, y: 240 },    // Bored
+  { x: 40, y: 160 },    // Tired
+  { x: 120, y: 320 },   // Fatigued
 
   // Greens (bottom-right)
-  { x: 420, y: 420 },  // Calm
-  { x: 500, y: 440 },  // Good
-  { x: 440, y: 480 },  // Thoughtful
-  { x: 380, y: 440 }   // Chill
+  { x: 220, y: 320 },   // Calm
+  { x: 300, y: 340 },   // Good
+  { x: 180, y: 340 },   // Thoughtful
+  { x: 120, y: 280 }    // Chill
 ]
 
 function App() {

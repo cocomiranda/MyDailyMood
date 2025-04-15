@@ -165,7 +165,7 @@ function App() {
 
         <DayStreak moodEntries={getMoodEntries()} />
 
-        {/* <button className="share-button" style={{ marginTop: '0.5rem', display: 'none' }}>
+        <button className="share-button" style={{ marginTop: '0.5rem', display: 'block' }}>
         <a 
           href="https://twitter.com/share?ref_src=twsrc%5Etfw" 
           className="twitter-share-button" 
@@ -181,7 +181,7 @@ function App() {
           Tweet
         </a>
         </button>
-        <script async src="https://platform.twitter.com/widgets.js" charSet="UTF-8"></script> */}
+        <script async src="https://platform.twitter.com/widgets.js" charSet="UTF-8"></script>
 
         <div style={{ marginTop: '6rem', zoom: '0.6', display: 'block'}}>
           <script async src="https://js.stripe.com/v3/buy-button.js"></script>
@@ -211,8 +211,4 @@ declare namespace JSX {
   }
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 9c36617 (Add Stripe buy button and adjust layout)
 export default App

@@ -205,4 +205,10 @@ function isLightColor(color: string) {
   return brightness > 155
 }
 
+declare namespace JSX {
+  interface IntrinsicElements {
+    'stripe-buy-button': any; // or define a more specific type if needed
+  }
+}
+
 export default App

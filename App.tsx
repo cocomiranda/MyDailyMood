@@ -183,7 +183,7 @@ function App() {
         </button>
         <script async src="https://platform.twitter.com/widgets.js" charSet="UTF-8"></script> */}
 
-        <div style={{ marginTop: '6rem', zoom: '0.6'}}>
+        <div style={{ marginTop: '6rem', zoom: '0.6', display: 'block'}}>
           <script async src="https://js.stripe.com/v3/buy-button.js"></script>
           <stripe-buy-button
             buy-button-id="buy_btn_1REBZeIHQQKGPcYUPkUNcn52"

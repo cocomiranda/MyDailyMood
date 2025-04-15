@@ -181,7 +181,15 @@ function App() {
           Tweet
         </a>
         </button>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <script async src="https://platform.twitter.com/widgets.js" charSet="UTF-8"></script>
+
+        <div style={{ marginTop: '6rem', zoom: '0.6'}}>
+          <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+          <stripe-buy-button
+            buy-button-id="buy_btn_1REBZeIHQQKGPcYUPkUNcn52"
+            publishable-key="pk_live_51REBRxIHQQKGPcYUkWysXhVOgYOdPkYAi6kUlcmwxrVWizeyCqyYpXrJthpEAncJxi6kyYNdqyFvvFxPXNsnF7wv00Hmb1MOGe"
+          ></stripe-buy-button>
+        </div>
       </div>
     </div>
   )

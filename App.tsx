@@ -211,5 +211,8 @@ declare namespace JSX {
   }
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9c36617 (Add Stripe buy button and adjust layout)
 export default App

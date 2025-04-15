@@ -1,0 +1,17 @@
+{
+  "name": "MyDailyMood",
+  "short_name": "MDM",
+  "description": "Little check-ins, big self-care.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#a7e3d1",
+  "icons": [
+    {
+      "src": "/mdm-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+} 

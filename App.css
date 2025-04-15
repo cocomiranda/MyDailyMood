@@ -50,12 +50,14 @@
   margin: 0 auto;
   background-color: #fff;
   color: #333;
+  margin-top: 0.5rem;
 }
 
 .date-display {
   font-size: 0.9rem;
   color: #999;
-  margin-bottom: 0;
+  margin-top: 2rem;
+  margin-bottom: -0.5rem;
   font-weight: 300;
   letter-spacing: 1px;
   text-align: center;
@@ -68,18 +70,6 @@ h1 {
   font-size: 1.6rem;
 }
 
-.emotion-bubbles {
-  position: relative;
-  width: 380px;
-  height: 380px;
-  margin: 0 auto 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: center;
-  overflow: visible;
-}
-
 .content-wrapper {
   width: 100%;
   max-width: 400px;
@@ -90,10 +80,34 @@ h1 {
   gap: 0;
 }
 
+.emotion-bubbles {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes gentlePulse {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  50% {
+    transform: scale(1.05) translateY(-2px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
 .emotion-bubble {
-  position: absolute;
-  width: 52px;
-  height: 52px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
   border: none;
   border-radius: 50%;
   padding: 0.4rem;
@@ -103,30 +117,20 @@ h1 {
   justify-content: center;
   text-align: center;
   font-size: 0.7rem;
+  box-shadow: none;
   word-wrap: break-word;
-  opacity: 0;
-  transform: translate(-50%, -50%);
-  animation: fadeInScale 0.6s ease-out forwards;
-  animation-delay: calc(var(--animation-order) * 0.1s);
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+  animation: gentlePulse 3s ease-in-out infinite;
+  animation-delay: calc(var(--animation-order, 0) * 0.2s);
+  margin: 0 auto;
 }
 
 .emotion-bubble:hover {
-  transform: scale(1.05) translate(-50%, -50%);
   opacity: 1;
-}
-
-@keyframes fadeInScale {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.3);
-  }
-  60% {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
+  transform: scale(1.1);
+  z-index: 2;
+  animation: none;
 }
 
 .emotion-text {
@@ -154,29 +158,37 @@ h1 {
 .stats-controls {
   display: flex;
   gap: 0.75rem;
-  margin: 4rem 0 0;
+  margin: 4.5rem 0 1rem 0;
   justify-content: center;
+  width: 100%;
+  max-width: 320px;
 }
 
 .stats-controls button {
-  padding: 0.3rem 0.8rem;
+  flex: 1;
+  /* min-width: 50px; */
+  max-width: 60px;
+  padding: 0.3rem;
   border: none;
   border-radius: 3px;
-  background: #f5f5f5;
+  background: rgba(245, 245, 245, 0.9);
   color: #999;
   font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 400;
+  backdrop-filter: blur(2px);
+  letter-spacing: -0.01em;
+  text-align: center;
 }
 
 .stats-controls button:hover {
-  background: #eeeeee;
+  background: rgba(238, 238, 238, 0.95);
   color: #666;
 }
 
 .stats-controls button.active {
-  background: #e8e8e8;
+  background: rgba(232, 232, 232, 0.95);
   color: #333;
   font-weight: 500;
 }
@@ -338,6 +350,13 @@ h1 {
   --good-color: rgb(105, 219, 124);
   --thoughtful-color: rgb(64, 192, 87);
   --chill-color: rgb(47, 158, 68);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app-title {
@@ -358,3 +377,118 @@ h1 {
 .header {
   margin-bottom: 1rem;
 }
+
+@keyframes gentleFloat {
+  0% {
+    transform: translate(-50%, -50%);
+  }
+  50% {
+    transform: translate(-50%, -45%);
+  }
+  100% {
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes gentleButtonFloat {
+  0% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -5px);
+  }
+  100% {
+    transform: translate(-50%, 0);
+  }
+}
+
+.streak-container {
+  width: 100%;
+  max-width: 320px;
+  margin: 3rem auto 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 16px;
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); */
+}
+
+.streak-flame {
+  display: flex;
+  align-items: center; /* Aligns items vertically */
+  justify-content: flex-start; /* Aligns items to the left */
+  flex-direction: column;
+  /* margin-top: -0.5rem; */
+  gap: 0.1rem;
+  color: #FF6B2C;
+  max-height: 2rem;
+}
+
+.streak-number {
+  margin-right: 14.5rem; /* Optional: adds space between the number and the flame */
+  /* margin-top: 4rem; */
+  justify-content: flex-start; /* Aligns items to the left */
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1;
+  background: linear-gradient(45deg, #FF6B2C, #FF8F50);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.streak-text {
+  font-size: 0.9rem;
+  margin-top: -1.5rem;
+  margin-left: -8rem;
+  color: #666;
+}
+
+#streak {
+  margin-top: -2rem;
+  margin-left: -4.5rem;
+  zoom: 0.8;
+}
+
+.streak-highlight {
+  color: #FF6B2C;
+  font-weight: 500;
+}
+
+@keyframes flameFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.streak-flame {
+  animation: flameFloat 3s ease-in-out infinite;
+}
+
+.share-button {
+  background-color: #fff; /* Twitter blue */
+  color: white; /* Text color */
+  border: none; /* No border */
+  border-radius: 5px; /* Rounded corners */
+  padding: 1rem 2rem; /* Padding for the button */
+  font-size: 1rem; /* Font size */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
+  display: inline-flex; /* Aligns items in the center */
+  align-items: center; /* Vertically centers the content */
+  text-decoration: none; /* Removes underline from link */
+}
+
+.share-button:hover {
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.share-button:active {
+  transform: scale(0.95); /* Slightly shrink on click */
+}
+

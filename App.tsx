@@ -3,6 +3,8 @@ import { EMOTIONS } from './constants'
 import { MoodStats, MoodEntry } from './types'
 import { saveMoodEntry, getMoodEntries, calculateStats, hasEntryForToday } from './utils/moodUtils'
 import './App.css'
+import  { StripeBuyButton } from '@stripe/stripe-react-native';
+import { Analytics } from "@vercel/analytics/react";
 
 const DayStreak = ({ moodEntries }: { moodEntries: MoodEntry[] }) => {
   const [streak, setStreak] = useState(0);
@@ -192,6 +194,7 @@ function App() {
                   </div>
         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
       </div>
+      <Analytics />
     </div>
   )
 }

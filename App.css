@@ -51,6 +51,7 @@
   background-color: #fff;
   color: #333;
   margin-top: 0.5rem;
+  align-items: center; /* Center items horizontally */
 }
 
 .date-display {
@@ -72,7 +73,7 @@ h1 {
 
 .content-wrapper {
   width: 100%;
-  max-width: 400px;
+  max-width: 384px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -331,6 +332,17 @@ h1 {
     width: 320px;
     height: 320px;
     transform: scale(0.9);
+  }
+}
+
+@media (max-width: 400px) {
+  .app {
+    max-width: 100%; /* Allow full width on smaller screens */
+    padding: 0.5rem; /* Adjust padding for smaller screens */
+  }
+
+  .content-wrapper {
+    max-width: 100%; /* Allow full width on smaller screens */
   }
 }
 

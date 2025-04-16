@@ -473,8 +473,8 @@ h1 {
 
 
 .stripe-button {
-  zoom: 0.5;
-  height: 80vh;
+  zoom: 0.4;
+  height: 60vh;
   display: flex;
   justify-content: center;
   align-items: center;

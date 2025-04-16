@@ -3,8 +3,18 @@ import { EMOTIONS } from './constants'
 import { MoodStats, MoodEntry } from './types'
 import { saveMoodEntry, getMoodEntries, calculateStats, hasEntryForToday } from './utils/moodUtils'
 import './App.css'
-import  { StripeBuyButton } from '@stripe/stripe-react-native';
 import { Analytics } from "@vercel/analytics/react";
+
+
+declare namespace JSX {
+  interface IntrinsicElements {
+    'stripe-buy-button': {
+      buyButtonId: string;
+      publishableKey: string;
+    }
+  }
+}
+
 
 const DayStreak = ({ moodEntries }: { moodEntries: MoodEntry[] }) => {
   const [streak, setStreak] = useState(0);
@@ -167,32 +177,13 @@ function App() {
 
         <DayStreak moodEntries={getMoodEntries()} />
 
-        <button className="share-button" style={{ marginTop: '0.5rem', display: 'block' }}>
-          <a 
-          href="https://twitter.com/share?ref_src=twsrc%5Etfw" 
-          className="twitter-share-button" 
-          data-size="large" 
-          data-text="Today I'm feeling happy." 
-          data-url="https://mydailymood.vercel.app/" 
-          data-hashtags="MentalHealth,SelfCare,MoodTracker,MyDailyMood" 
-          data-show-count="false"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ marginTop: '10rem', display: 'inline-block', textDecoration: 'none', color: 'black' }} // Optional styling
-        >
-          Tweet
-        </a>
-        </button>
-        <script async src="https://platform.twitter.com/widgets.js" charSet="UTF-8"></script>
-
-        <div style={{ marginTop: '6rem', zoom: '0.6', display: 'block'}}>
-          <script async src="https://js.stripe.com/v3/buy-button.js"></script>
+      </div>
+      <div className="stripe-button" >
           <stripe-buy-button
             buy-button-id="buy_btn_1REBZeIHQQKGPcYUPkUNcn52"
             publishable-key="pk_live_51REBRxIHQQKGPcYUkWysXhVOgYOdPkYAi6kUlcmwxrVWizeyCqyYpXrJthpEAncJxi6kyYNdqyFvvFxPXNsnF7wv00Hmb1MOGe"
-          ></stripe-buy-button> 
-                  </div>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+          >
+          </stripe-buy-button>
       </div>
       <Analytics />
     </div>
@@ -209,10 +200,6 @@ function isLightColor(color: string) {
   return brightness > 155
 }
 
-declare namespace JSX {
-  interface IntrinsicElements {
-    'stripe-buy-button': any; // or define a more specific type if needed
-  }
-}
+
 
 export default App

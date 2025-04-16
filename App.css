@@ -470,23 +470,13 @@ h1 {
   animation: flameFloat 3s ease-in-out infinite;
 }
 
-.share-button {
-  background-color: #fff; /* Twitter blue */
-  color: white; /* Text color */
-  border: none; /* No border */
-  border-radius: 5px; /* Rounded corners */
-  padding: 1rem 2rem; /* Padding for the button */
-  font-size: 1rem; /* Font size */
-  cursor: pointer; /* Pointer cursor on hover */
-  transition: background-color 0.3s, transform 0.2s; /* Smooth transition for hover effects */
-  display: inline-flex; /* Aligns items in the center */
-}
 
-.share-button:hover {
-  transform: scale(1.05); /* Slightly enlarge on hover */
-}
 
-.share-button:active {
-  transform: scale(0.95); /* Slightly shrink on click */
+.stripe-button {
+  zoom: 0.5;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
 }
-

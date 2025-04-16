@@ -65,14 +65,6 @@ button:focus-visible {
   }
 }
 
-.share-button {
-  background-color: #fff; /* Twitter blue */
-  color: white; /* Text color */
-  border: none; /* No border */
-  padding: 10px 20px; /* Padding */
-  border-radius: 20px; /* Rounded corners */
-  cursor: pointer; /* Cursor on hover */
-  transition: background-color 0.3s ease; /* Smooth transition */
-}
+
 
 

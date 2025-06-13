@@ -140,7 +140,6 @@ function DonutChart({ data }: { data: { emotion: string, count: number }[] }) {
     </div>
   );
 }
-
 function scheduleDailyNotification() {
   if (!('Notification' in window)) return;
   Notification.requestPermission().then(permission => {

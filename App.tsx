@@ -115,6 +115,9 @@ function renderCustomLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent
 }
 
 function DonutChart({ data }: { data: { emotion: string, count: number }[] }) {
+  // Get color for each mood from CSS variable
+  const getColor = (emotion: string) =>
+    getComputedStyle(document.documentElement).getPropertyValue(`--${emotion.toLowerCase()}-color`).trim() || '#8884d8';
   return (
     <div style={{ width: '100%', maxWidth: 220, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <ResponsiveContainer width="100%" height={180}>
@@ -131,15 +134,15 @@ function DonutChart({ data }: { data: { emotion: string, count: number }[] }) {
             label={false}
             labelLine={false}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            {data.map((entry) => (
+              <Cell key={entry.emotion} fill={getColor(entry.emotion)} />
             ))}
           </Pie>
         </PieChart>
       </ResponsiveContainer>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, gap: 2 }}>
-        {data.map((entry, index) => (
-          <span key={entry.emotion} style={{ color: COLORS[index % COLORS.length], fontSize: 13, fontWeight: 500 }}>
+        {data.map((entry) => (
+          <span key={entry.emotion} style={{ color: getColor(entry.emotion), fontSize: 13, fontWeight: 500 }}>
             {entry.emotion} {((entry.count / data.reduce((a, b) => a + b.count, 0)) * 100).toFixed(0)}%
           </span>
         ))}
@@ -174,11 +177,90 @@ function scheduleDailyNotification() {
   });
 }
 
+const moodMessages: Record<string, string> = {
+  Hopeful: "The future holds great possibilities — keep moving forward.",
+  Confident: "You're on the right path. Own it!",
+  Tense: "Try to let go a little. Even small pauses can help.",
+  Uneasy: "Not every day feels steady — you're doing your best.",
+  Cheerful: "Let that lightness brighten someone else's day too.",
+  Curious: "Asking questions is how we grow — keep exploring.",
+  Pleasant: "Sometimes the simple days are the best ones.",
+  Pleased: "It's nice when things just feel right, isn't it?",
+  Playful: "A little fun can go a long way. Keep the joy alive.",
+  Bored: "Shake things up — even small changes can spark excitement.",
+  Tired: "Your body and mind deserve some kindness and rest.",
+  Fatigued: "Slow down — you don't have to do it all at once.",
+  Calm: "Peace is powerful. Let it linger a while.",
+  Good: "Things don't have to be extraordinary to be meaningful.",
+  Thoughtful: "Your reflection today might spark someone's tomorrow.",
+  Chill: "Staying cool under pressure is a quiet kind of strength."
+};
+
+function getColor(emotion: string | null) {
+  if (!emotion) return '#e0e0e0'; // grey for blank
+  return getComputedStyle(document.documentElement).getPropertyValue(`--${emotion.toLowerCase()}-color`).trim() || '#8884d8';
+}
+
+function getDaysArray(range: 'week' | 'month' | 'year') {
+  const today = new Date();
+  let days = 7;
+  if (range === 'month') days = 30;
+  if (range === 'year') days = 365;
+  return Array.from({ length: days }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (days - 1 - i));
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+}
+
+function DotsGrid({ moodEntries, range }: { moodEntries: MoodEntry[]; range: 'week' | 'month' | 'year' }) {
+  const days = getDaysArray(range);
+  // Map date string to emotion
+  const entryMap = Object.fromEntries(
+    moodEntries.map(e => [new Date(e.timestamp).toDateString(), e.emotion])
+  );
+  // Responsive columns and dot size
+  let columns = 7, dot = 16, gap = 4, gridWidth: number | undefined = 180, fullWidth = false;
+  if (range === 'year') { columns = 21; dot = 13; gap = 2; gridWidth = undefined; fullWidth = true; }
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${columns}, 1fr)` ,
+      gap,
+      justifyContent: 'center',
+      margin: '0 auto',
+      maxWidth: gridWidth,
+      width: fullWidth ? '100%' : gridWidth,
+      marginTop: 12
+    }}>
+      {days.map((date, i) => (
+        <div
+          key={date.toISOString()}
+          title={date.toDateString() + (entryMap[date.toDateString()] ? `: ${entryMap[date.toDateString()]}` : '')}
+          style={{
+            width: dot,
+            height: dot,
+            borderRadius: '50%',
+            background: getColor(entryMap[date.toDateString()] || null),
+            border: '1px solid #ccc',
+            margin: 0,
+            display: 'inline-block',
+            boxSizing: 'border-box',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function App() {
-  const [stats, setStats] = useState<MoodStats>({ week: {}, month: {}, year: {} })
+  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(getMoodEntries());
+  const [stats, setStats] = useState<MoodStats>(calculateStats(moodEntries));
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | null>(null)
   const [chartView, setChartView] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [dotsView, setDotsView] = useState(false);
 
   useEffect(() => {
     const match = window.matchMedia('(prefers-color-scheme: dark)');
@@ -189,30 +271,22 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const entries = getMoodEntries()
-    setStats(calculateStats(entries))
-  }, [])
+    setStats(calculateStats(moodEntries));
+  }, [moodEntries]);
 
   useEffect(() => {
     scheduleDailyNotification();
   }, []);
 
   const handleEmotionClick = (emotion: string) => {
-    const entries = getMoodEntries()
-    
-    if (hasEntryForToday(entries)) {
+    if (hasEntryForToday(moodEntries)) {
       alert("Mood NOT saved. You've already recorded today's mood — try again tomorrow!")
       return
     }
-
-    const newEntry = {
-      emotion,
-      timestamp: new Date().toISOString(),
-    }
-
     saveMoodEntry(emotion)
-    setStats(calculateStats(entries))
-    alert("Thanks for logging your mood for today! Come back tomorrow to log your next one.")
+    const updatedEntries = getMoodEntries();
+    setMoodEntries(updatedEntries);
+    alert(moodMessages[emotion] || "Thanks for logging your mood for today! Come back tomorrow to log your next one.")
   }
 
   const formatDate = (date: Date) => {
@@ -272,20 +346,36 @@ function App() {
           </button>
         </div>
         {timeRange && (
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0', gap: 8 }}>
             <button
               className="toggle-chart-view"
-              onClick={() => setChartView(v => !v)}
-              style={{ fontSize: 12, padding: '2px 10px' }}
+              onClick={() => { setChartView(false); setDotsView(false); }}
+              style={{ fontSize: 12, padding: '2px 10px', border: (!chartView && !dotsView) ? '2px solid #333' : undefined }}
             >
-              {chartView ? 'List View' : 'Chart View'}
+              List View
+            </button>
+            <button
+              className="toggle-chart-view"
+              onClick={() => { setChartView(true); setDotsView(false); }}
+              style={{ fontSize: 12, padding: '2px 10px', border: (chartView && !dotsView) ? '2px solid #333' : undefined }}
+            >
+              Chart View
+            </button>
+            <button
+              className="toggle-chart-view"
+              onClick={() => { setDotsView(true); setChartView(false); }}
+              style={{ fontSize: 12, padding: '2px 10px', border: dotsView ? '2px solid #333' : undefined }}
+            >
+              Dots View
             </button>
           </div>
         )}
 
         {timeRange && Object.values(stats[timeRange]).some(count => count > 0) && (
           <div className="stats-display">
-            {chartView ? (
+            {dotsView ? (
+              <DotsGrid moodEntries={moodEntries} range={timeRange} />
+            ) : chartView ? (
               <DonutChart data={Object.entries(stats[timeRange])
                 .filter(([, count]) => count > 0)
                 .map(([emotion, count]) => ({ emotion, count }))} />
@@ -305,7 +395,7 @@ function App() {
           </div>
         )}
 
-        <DayStreak moodEntries={getMoodEntries()} />
+        <DayStreak moodEntries={moodEntries} />
 
       </div>
       <div className="stripe-button" >

@@ -289,6 +289,66 @@ function App() {
     })
   }
 
+  // Add function to generate AI summary
+  const generateMoodSummary = (entries: MoodEntry[]) => {
+    if (entries.length === 0) return "No mood entries yet. Start tracking your moods to get insights!";
+
+    // Group emotions by category
+    const emotionCategories = {
+      positive: ['Hopeful', 'Confident', 'Cheerful', 'Pleasant', 'Pleased', 'Playful', 'Good', 'Calm', 'Chill'],
+      neutral: ['Curious', 'Thoughtful', 'Bored'],
+      challenging: ['Tense', 'Uneasy', 'Tired', 'Fatigued']
+    };
+
+    // Count emotions by category
+    const categoryCounts = entries.reduce((acc, entry) => {
+      if (emotionCategories.positive.includes(entry.emotion)) acc.positive++;
+      else if (emotionCategories.neutral.includes(entry.emotion)) acc.neutral++;
+      else if (emotionCategories.challenging.includes(entry.emotion)) acc.challenging++;
+      return acc;
+    }, { positive: 0, neutral: 0, challenging: 0 });
+
+    // Calculate percentages
+    const total = entries.length;
+    const positivePercent = (categoryCounts.positive / total) * 100;
+    const neutralPercent = (categoryCounts.neutral / total) * 100;
+    const challengingPercent = (categoryCounts.challenging / total) * 100;
+
+    // Find most common emotions
+    const emotionCounts = entries.reduce((acc, entry) => {
+      acc[entry.emotion] = (acc[entry.emotion] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const topEmotions = Object.entries(emotionCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([emotion, count]) => `${emotion} (${count} times)`);
+
+    // Generate summary text
+    let summary = `Based on your ${total} mood entries:\n\n`;
+    
+    if (positivePercent > 60) {
+      summary += "You've been experiencing predominantly positive emotions. ";
+    } else if (challengingPercent > 40) {
+      summary += "You've had some challenging moments recently. ";
+    } else {
+      summary += "Your emotional state has been quite balanced. ";
+    }
+
+    summary += `Your most frequent emotions were ${topEmotions.join(', ')}.\n\n`;
+
+    if (positivePercent > 70) {
+      summary += "You're maintaining a very positive outlook!";
+    } else if (challengingPercent > 50) {
+      summary += "Remember that challenging emotions are temporary and part of the human experience.";
+    } else {
+      summary += "You're showing good emotional balance in your daily life.";
+    }
+
+    return summary;
+  };
+
   return (
     <div className={`app${isDarkMode ? ' dark-mode' : ''}`}>
       <header className="header">
@@ -378,6 +438,12 @@ function App() {
                 </li>
               ))}
             </ul>
+            <div className="mood-summary">
+              <h4>Your Mood Summary</h4>
+              <p style={{ whiteSpace: 'pre-line', textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                {generateMoodSummary(moodEntries)}
+              </p>
+            </div>
           </div>
         ) : (timeRange && Object.values(stats[timeRange]).some(count => count > 0)) ? (
           <div className="stats-display">

@@ -598,3 +598,41 @@ h1 {
 .dark-mode .stripe-button {
   background: #202836;
 }
+
+.mood-summary {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(245, 245, 245, 0.5);
+  border-radius: 8px;
+  text-align: left;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mood-summary h4 {
+  color: #333;
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.mood-summary p {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Dark mode styles for mood summary */
+.dark-mode .mood-summary {
+  background: rgba(45, 45, 45, 0.5);
+}
+
+.dark-mode .mood-summary h4 {
+  color: #f1f1f1;
+}
+
+.dark-mode .mood-summary p {
+  color: #ddd;
+}

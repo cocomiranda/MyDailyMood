@@ -7,16 +7,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 
-declare namespace JSX {
-  interface IntrinsicElements {
-    'stripe-buy-button': {
-      buyButtonId: string;
-      publishableKey: string;
-    }
-  }
-}
-
-
 const DayStreak = ({ moodEntries }: { moodEntries: MoodEntry[] }) => {
   const [streak, setStreak] = useState(0);
   const days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
@@ -261,6 +251,7 @@ function App() {
   const [chartView, setChartView] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [dotsView, setDotsView] = useState(false);
+  const [showAllMoods, setShowAllMoods] = useState(false);
 
   useEffect(() => {
     const match = window.matchMedia('(prefers-color-scheme: dark)');
@@ -340,48 +331,65 @@ function App() {
           </button>
           <button
             className={timeRange === 'year' ? 'active' : ''}
-            onClick={() => setTimeRange(timeRange === 'year' ? null : 'year')}
+            onClick={() => {setTimeRange(timeRange === 'year' ? null : 'year'); setChartView(false); setDotsView(false); setShowAllMoods(false);}}
           >
             Year
           </button>
+          <button
+            className={showAllMoods ? 'active' : ''}
+            onClick={() => {setShowAllMoods(true); setTimeRange(null); setChartView(false); setDotsView(false);}}
+          >
+            All Moods
+          </button>
         </div>
-        {timeRange && (
+        {(timeRange || showAllMoods) && (
           <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0', gap: 8 }}>
             <button
               className="toggle-chart-view"
-              onClick={() => { setChartView(false); setDotsView(false); }}
-              style={{ fontSize: 12, padding: '2px 10px', border: (!chartView && !dotsView) ? '2px solid #333' : undefined }}
+              onClick={() => { setChartView(false); setDotsView(false); setShowAllMoods(false);}}
+              style={{ fontSize: 12, padding: '2px 10px', border: (!chartView && !dotsView && !showAllMoods) ? '2px solid #333' : undefined }}
             >
               List View
             </button>
             <button
               className="toggle-chart-view"
-              onClick={() => { setChartView(true); setDotsView(false); }}
-              style={{ fontSize: 12, padding: '2px 10px', border: (chartView && !dotsView) ? '2px solid #333' : undefined }}
+              onClick={() => { setChartView(true); setDotsView(false); setShowAllMoods(false);}}
+              style={{ fontSize: 12, padding: '2px 10px', border: (chartView && !dotsView && !showAllMoods) ? '2px solid #333' : undefined }}
             >
               Chart View
             </button>
             <button
               className="toggle-chart-view"
-              onClick={() => { setDotsView(true); setChartView(false); }}
-              style={{ fontSize: 12, padding: '2px 10px', border: dotsView ? '2px solid #333' : undefined }}
+              onClick={() => { setDotsView(true); setChartView(false); setShowAllMoods(false);}}
+              style={{ fontSize: 12, padding: '2px 10px', border: (dotsView && !showAllMoods) ? '2px solid #333' : undefined }}
             >
               Dots View
             </button>
           </div>
         )}
 
-        {timeRange && Object.values(stats[timeRange]).some(count => count > 0) && (
+        {showAllMoods ? (
+          <div className="all-moods-list">
+            <h3>All Available Moods:</h3>
+            <ul>
+              {EMOTIONS.map((emotion) => (
+                <li key={emotion} style={{ color: getColor(emotion) }}>
+                  {emotion}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (timeRange && Object.values(stats[timeRange]).some(count => count > 0)) ? (
           <div className="stats-display">
             {dotsView ? (
-              <DotsGrid moodEntries={moodEntries} range={timeRange} />
+              <DotsGrid moodEntries={moodEntries} range={timeRange as 'week' | 'month' | 'year'} />
             ) : chartView ? (
-              <DonutChart data={Object.entries(stats[timeRange])
+              <DonutChart data={Object.entries(stats[timeRange as 'week' | 'month' | 'year'])
                 .filter(([, count]) => count > 0)
                 .map(([emotion, count]) => ({ emotion, count }))} />
             ) : (
               <div className="stats-grid">
-                {Object.entries(stats[timeRange])
+                {Object.entries(stats[timeRange as 'week' | 'month' | 'year'])
                   .filter(([, count]) => count > 0)
                   .sort(([, a], [, b]) => b - a)
                   .map(([emotion, count]) => (
@@ -393,7 +401,7 @@ function App() {
               </div>
             )}
           </div>
-        )}
+        ) : (timeRange) && <p>No mood entries for this period.</p>}
 
         <DayStreak moodEntries={moodEntries} />
 

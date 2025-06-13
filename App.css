@@ -483,8 +483,6 @@ h1 {
   animation: flameFloat 3s ease-in-out infinite;
 }
 
-
-
 .stripe-button {
   scale: 0.5;
   height: 30vh;
@@ -492,4 +490,111 @@ h1 {
   justify-content: center;
   align-items: center;
   align-content: center;
+}
+
+/* Night mode styles */
+.dark-mode {
+  background: #202836;
+  color: #f1f1f1;
+}
+.dark-mode .header,
+.dark-mode .content-wrapper {
+  background: #202836;
+  color: #f1f1f1;
+}
+.dark-mode .emotion-bubble {
+  border: 1px solid #333;
+}
+.dark-mode .stats-controls button {
+  background: #232323;
+  color: #f1f1f1;
+  border: 1px solid #444;
+}
+.dark-mode .stats-controls button.active {
+  background: #333;
+  color: #FFD600;
+}
+.dark-mode .toggle-chart-view {
+  background: #232323;
+  color: #FFD600;
+  border: 1px solid #444;
+}
+.dark-mode .stats-grid .stat-item {
+  background: #202836;
+  color: #FFD600;
+}
+/* Mood-specific stat-item backgrounds for dark mode */
+.dark-mode .stat-item[data-emotion="Hopeful"] {
+  background-color: rgb(255, 107, 107);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Confident"] {
+  background-color: rgb(255, 135, 135);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Tense"] {
+  background-color: rgb(255, 160, 122);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Uneasy"] {
+  background-color: rgb(255, 127, 80);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Cheerful"] {
+  background-color: rgb(255, 217, 61);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Curious"] {
+  background-color: rgb(246, 224, 94);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Pleasant"] {
+  background-color: rgb(255, 215, 0);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Pleased"] {
+  background-color: rgb(255, 193, 7);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Playful"] {
+  background-color: rgb(255, 183, 77);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Bored"] {
+  background-color: rgb(116, 192, 252);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Tired"] {
+  background-color: rgb(77, 171, 247);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Fatigued"] {
+  background-color: rgb(51, 154, 240);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Calm"] {
+  background-color: rgb(140, 233, 154);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Good"] {
+  background-color: rgb(105, 219, 124);
+  color: #333;
+}
+.dark-mode .stat-item[data-emotion="Thoughtful"] {
+  background-color: rgb(64, 192, 87);
+  color: #fff;
+}
+.dark-mode .stat-item[data-emotion="Chill"] {
+  background-color: rgb(47, 158, 68);
+  color: #fff;
+}
+.dark-mode .stats-grid .stat-item .count {
+  color: inherit;
+}
+.dark-mode .streak-container {
+  background: #202836;
+  color: #FFD600;
+}
+.dark-mode .stripe-button {
+  background: #202836;
 }

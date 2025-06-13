@@ -4,6 +4,7 @@ import { MoodStats, MoodEntry } from './types'
 import { saveMoodEntry, getMoodEntries, calculateStats, hasEntryForToday } from './utils/moodUtils'
 import './App.css'
 import { Analytics } from "@vercel/analytics/react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 
 declare namespace JSX {
@@ -75,14 +76,126 @@ const DayStreak = ({ moodEntries }: { moodEntries: MoodEntry[] }) => {
   );
 };
 
+// DonutChart component for stats
+const COLORS = [
+  '#FFD600', // Happy
+  '#FF5252', // Romantic
+  '#4FC3F7', // Calm
+  '#81C784', // Other colors as needed
+  '#FFB300', '#BA68C8', '#FF8A65', '#A1887F', '#90A4AE', '#F06292'
+];
+
+function renderCustomLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+  index: number;
+  name: string;
+}) {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) / 2;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const color = COLORS[index % COLORS.length];
+  return (
+    <text
+      x={x}
+      y={y}
+      fill={color}
+      textAnchor="middle"
+      dominantBaseline="central"
+      style={{ fontSize: 12, fontWeight: 500 }}
+    >
+      {`${name} ${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+}
+
+function DonutChart({ data }: { data: { emotion: string, count: number }[] }) {
+  return (
+    <div style={{ width: '100%', maxWidth: 220, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <ResponsiveContainer width="100%" height={180}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="count"
+            nameKey="emotion"
+            cx="50%"
+            cy="50%"
+            innerRadius={45}
+            outerRadius={70}
+            fill="#8884d8"
+            label={false}
+            labelLine={false}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, gap: 2 }}>
+        {data.map((entry, index) => (
+          <span key={entry.emotion} style={{ color: COLORS[index % COLORS.length], fontSize: 13, fontWeight: 500 }}>
+            {entry.emotion} {((entry.count / data.reduce((a, b) => a + b.count, 0)) * 100).toFixed(0)}%
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function scheduleDailyNotification() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(permission => {
+    if (permission !== 'granted') return;
+    const now = new Date();
+    const target = new Date();
+    target.setHours(11, 30, 0, 0); // 11:30 local time
+    if (now > target) {
+      // If it's already past 11:30 today, schedule for tomorrow
+      target.setDate(target.getDate() + 1);
+    }
+    const msUntilTarget = target.getTime() - now.getTime();
+    // Avoid multiple notifications in one day
+    const lastNotified = localStorage.getItem('lastMoodNotification');
+    const todayStr = target.toDateString();
+    if (lastNotified === todayStr) return;
+    setTimeout(() => {
+      new Notification('Daily Mood Tracking', {
+        body: 'Make sure to track your mood today!',
+        icon: '/icon-192.png', // Optional: update to your app icon path
+      });
+      localStorage.setItem('lastMoodNotification', todayStr);
+    }, msUntilTarget);
+  });
+}
+
 function App() {
   const [stats, setStats] = useState<MoodStats>({ week: {}, month: {}, year: {} })
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | null>(null)
+  const [chartView, setChartView] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const match = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(match.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+    match.addEventListener('change', handler);
+    return () => match.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const entries = getMoodEntries()
     setStats(calculateStats(entries))
   }, [])
+
+  useEffect(() => {
+    scheduleDailyNotification();
+  }, []);
 
   const handleEmotionClick = (emotion: string) => {
     const entries = getMoodEntries()
@@ -112,7 +225,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app${isDarkMode ? ' dark-mode' : ''}`}>
       <header className="header">
         <h1 className="app-title">MyDailyMood</h1>
         <p className="app-tagline">Little check-ins, big self-care.</p>
@@ -158,20 +271,37 @@ function App() {
             Year
           </button>
         </div>
+        {timeRange && (
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0' }}>
+            <button
+              className="toggle-chart-view"
+              onClick={() => setChartView(v => !v)}
+              style={{ fontSize: 12, padding: '2px 10px' }}
+            >
+              {chartView ? 'List View' : 'Chart View'}
+            </button>
+          </div>
+        )}
 
         {timeRange && Object.values(stats[timeRange]).some(count => count > 0) && (
           <div className="stats-display">
-            <div className="stats-grid">
-              {Object.entries(stats[timeRange])
+            {chartView ? (
+              <DonutChart data={Object.entries(stats[timeRange])
                 .filter(([, count]) => count > 0)
-                .sort(([, a], [, b]) => b - a)
-                .map(([emotion, count]) => (
-                  <div key={emotion} className="stat-item" data-emotion={emotion}>
-                    <span className="emotion">{emotion}</span>
-                    <span className="count">{count}</span>
-                  </div>
-                ))}
-            </div>
+                .map(([emotion, count]) => ({ emotion, count }))} />
+            ) : (
+              <div className="stats-grid">
+                {Object.entries(stats[timeRange])
+                  .filter(([, count]) => count > 0)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([emotion, count]) => (
+                    <div key={emotion} className="stat-item" data-emotion={emotion}>
+                      <span className="emotion">{emotion}</span>
+                      <span className="count">{count}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         )}
 

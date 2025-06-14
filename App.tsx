@@ -243,6 +243,44 @@ function DotsGrid({ moodEntries, range }: { moodEntries: MoodEntry[]; range: 'we
   );
 }
 
+// Message templates for variety
+const positiveTemplates = [
+  "you've been radiating positive energy.",
+  "your days have been filled with uplifting emotions.",
+  "positivity has been your main vibe.",
+  "you've shown a lot of optimism.",
+  "your mood has been mostly on the bright side.",
+  "you've been embracing the good moments.",
+  "your spirit has been shining.",
+  "you've kept a positive outlook.",
+  "joy and hope have been frequent companions.",
+  "you've been experiencing predominantly positive emotions."
+];
+const challengingTemplates = [
+  "you've faced some challenging moments.",
+  "it's been a period with a few emotional hurdles.",
+  "you've encountered some tough days.",
+  "there have been some emotional ups and downs.",
+  "you've been working through some challenges.",
+  "not every day has been easy, but you're moving forward.",
+  "you've shown resilience through difficult times.",
+  "you've had to navigate some rough patches.",
+  "it's been a time of growth through adversity.",
+  "you've had some challenging emotions recently."
+];
+const balancedTemplates = [
+  "your emotional state has been quite balanced.",
+  "you've maintained a steady emotional course.",
+  "your moods have been a mix of highs and lows.",
+  "you've experienced a healthy emotional balance.",
+  "your feelings have been well-rounded.",
+  "you've kept things in emotional equilibrium.",
+  "your mood has been stable overall.",
+  "you've shown a good mix of emotions.",
+  "your emotional journey has been even-keeled.",
+  "you've had a balanced emotional experience."
+];
+
 function App() {
   const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(getMoodEntries());
   const [stats, setStats] = useState<MoodStats>(calculateStats(moodEntries));
@@ -290,7 +328,7 @@ function App() {
   }
 
   // Add function to generate AI summary
-  const generateMoodSummary = (entries: MoodEntry[]) => {
+  const generateMoodSummary = (entries: MoodEntry[], timeRange: 'week' | 'month' | 'year' | null) => {
     if (entries.length === 0) return "No mood entries yet. Start tracking your moods to get insights!";
 
     // Group emotions by category
@@ -325,17 +363,22 @@ function App() {
       .slice(0, 3)
       .map(([emotion]) => `${emotion}`);
 
-    // Generate summary text
-    let summary = "";
-    
-    if (positivePercent > 60) {
-      summary += "You've been experiencing predominantly positive emotions. ";
-    } else if (challengingPercent > 40) {
-      summary += "You've had some challenging moments recently. ";
-    } else {
-      summary += "Your emotional state has been quite balanced. ";
-    }
+    // Add time frame reference
+    let timeFrameText = '';
+    if (timeRange === 'week') timeFrameText = 'this week';
+    else if (timeRange === 'month') timeFrameText = 'the past month';
+    else if (timeRange === 'year') timeFrameText = 'the last year';
+    else timeFrameText = 'this period';
 
+    // Randomly select a template
+    let scenarioTemplates;
+    if (positivePercent > 60) scenarioTemplates = positiveTemplates;
+    else if (challengingPercent > 40) scenarioTemplates = challengingTemplates;
+    else scenarioTemplates = balancedTemplates;
+    const randomTemplate = scenarioTemplates[Math.floor(Math.random() * scenarioTemplates.length)];
+
+    // Generate summary text
+    let summary = `For ${timeFrameText}, ${randomTemplate} `;
     summary += `Your most frequent emotions were ${topEmotions.join(', ')}.\n\n`;
 
     if (positivePercent > 70) {
@@ -360,6 +403,7 @@ function App() {
       <div className="content-wrapper">
         
         
+        {/* Swipable Mood Carousel */}
         <div className="emotion-bubbles">
           {EMOTIONS.map((emotion: string, index: number) => (
             <button
@@ -379,28 +423,54 @@ function App() {
         <div className="stats-controls">
           <button
             className={timeRange === 'week' ? 'active' : ''}
-            onClick={() => setTimeRange(timeRange === 'week' ? null : 'week')}
+            onClick={() => {
+              if (timeRange === 'week') {
+                setTimeRange(null);
+                setShowAllMoods(false);
+              } else {
+                setTimeRange('week');
+              }
+            }}
           >
             Week
           </button>
           <button
             className={timeRange === 'month' ? 'active' : ''}
-            onClick={() => setTimeRange(timeRange === 'month' ? null : 'month')}
+            onClick={() => {
+              if (timeRange === 'month') {
+                setTimeRange(null);
+                setShowAllMoods(false);
+              } else {
+                setTimeRange('month');
+              }
+            }}
           >
             Month
           </button>
           <button
             className={timeRange === 'year' ? 'active' : ''}
-            onClick={() => {setTimeRange(timeRange === 'year' ? null : 'year'); setChartView(false); setDotsView(false); setShowAllMoods(false);}}
+            onClick={() => {
+              if (timeRange === 'year') {
+                setTimeRange(null);
+                setShowAllMoods(false);
+              } else {
+                setTimeRange('year');
+              }
+            }}
           >
             Year
           </button>
-          <button
-            className={showAllMoods ? 'active ai-insights' : 'ai-insights'}
-            onClick={() => {setShowAllMoods(true); setTimeRange(null); setChartView(false); setDotsView(false); setShowSummary(false);}}
-          >
-            AI Insights
-          </button>
+          {timeRange && (
+            <button
+              className={showAllMoods ? 'active ai-insights' : 'ai-insights'}
+              onClick={() => {
+                setShowAllMoods(!showAllMoods);
+                setShowSummary(false);
+              }}
+            >
+              AI Insights
+            </button>
+          )}
         </div>
         {(timeRange || showAllMoods) && (
           <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0', gap: 8 }}>
@@ -433,7 +503,22 @@ function App() {
             <div className="mood-summary">
               <h4>Your Emotional Blueprint</h4>
               <p style={{ whiteSpace: 'pre-line', textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.4' }}>
-                {generateMoodSummary(moodEntries)}
+                {generateMoodSummary(
+                  moodEntries.filter(entry => {
+                    if (timeRange === 'week') {
+                      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                      return entry.timestamp >= oneWeekAgo;
+                    } else if (timeRange === 'month') {
+                      const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+                      return entry.timestamp >= oneMonthAgo;
+                    } else if (timeRange === 'year') {
+                      const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+                      return entry.timestamp >= oneYearAgo;
+                    }
+                    return false;
+                  }),
+                  timeRange
+                )}
               </p>
             </div>
           </div>

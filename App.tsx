@@ -396,7 +396,7 @@ function App() {
             Year
           </button>
           <button
-            className={showAllMoods ? 'active' : ''}
+            className={showAllMoods ? 'active ai-insights' : 'ai-insights'}
             onClick={() => {setShowAllMoods(true); setTimeRange(null); setChartView(false); setDotsView(false); setShowSummary(false);}}
           >
             AI Insights
@@ -431,7 +431,7 @@ function App() {
         {showAllMoods ? (
           <div className="all-moods-list">
             <div className="mood-summary">
-              <h4>Your Mood Summary</h4>
+              <h4>Your Emotional Blueprint</h4>
               <p style={{ whiteSpace: 'pre-line', textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.4' }}>
                 {generateMoodSummary(moodEntries)}
               </p>

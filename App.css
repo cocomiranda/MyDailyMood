@@ -195,6 +195,33 @@ h1 {
   font-weight: 500;
 }
 
+.stats-controls button.ai-insights {
+  background: linear-gradient(45deg, #7b68ee, #8a2be2);
+  color: #fff;
+  font-weight: 600;
+  border: 1px solid #6a5acd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.stats-controls button.ai-insights:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode styles for AI Insights button */
+.dark-mode .stats-controls button.ai-insights {
+  background: linear-gradient(45deg, #a78bfa, #c4b5fd);
+  color: #202836;
+  border: 1px solid #8b5cf6;
+}
+
+.dark-mode .stats-controls button.ai-insights:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
 .stats-grid {
   display: flex;
   flex-direction: column;

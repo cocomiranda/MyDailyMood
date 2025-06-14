@@ -14,5 +14,13 @@ export const EMOTIONS = [
   'Calm',
   'Good',
   'Thoughtful',
-  'Chill'
+  'Chill',
+  'Grateful',
+  'Inspired',
+  'Anxious',
+  'Motivated',
+  'Lonely',
+  'Excited',
+  'Overwhelmed',
+  'Content'
 ]; 

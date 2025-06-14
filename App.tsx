@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { EMOTIONS } from './constants'
+import React, { useState, useEffect, useRef } from 'react'
+import { EMOTIONS } from './types'
 import { MoodStats, MoodEntry } from './types'
 import { saveMoodEntry, getMoodEntries, calculateStats, hasEntryForToday } from './utils/moodUtils'
 import './App.css'
@@ -291,6 +291,8 @@ function App() {
   const [showAllMoods, setShowAllMoods] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
+  const [textareaRows, setTextareaRows] = useState(2);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     const match = window.matchMedia('(prefers-color-scheme: dark)');
@@ -404,17 +406,17 @@ function App() {
       <div className="content-wrapper">
         {/* Swipable Mood Carousel */}
         <div className="emotion-bubbles">
-          {EMOTIONS.map((emotion: string, index: number) => (
+          {EMOTIONS.map((emotion, index) => (
             <button
-              key={emotion}
+              key={emotion.name}
               className="emotion-bubble"
-              onClick={() => handleEmotionClick(emotion)}
+              onClick={() => handleEmotionClick(emotion.name)}
               style={{
-                backgroundColor: `var(--${emotion.toLowerCase()}-color)`,
+                backgroundColor: emotion.color,
                 '--animation-order': index,
               } as React.CSSProperties}
             >
-              <span className="emotion-text">{emotion}</span>
+              <span className="emotion-text">{emotion.name}</span>
             </button>
           ))}
         </div>
@@ -579,9 +581,9 @@ function App() {
               try {
                 const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(texto)}`);
                 if (response.ok) {
-                  alert("Mensaje enviado correctamente.");
+                  alert("Message sent successfully.");
                 } else {
-                  alert("No se pudo enviar el mensaje.");
+                  alert("Message not sent.");
                 }
               } catch (error) {
                 alert("Error enviando el mensaje.");
@@ -592,12 +594,26 @@ function App() {
             <textarea
               id="texto"
               name="texto"
-              rows={4}
+              rows={textareaRows}
+              ref={textareaRef}
               style={{ width: '100%', marginBottom: 10, fontSize: 16, padding: 8, borderRadius: 6, border: '1px solid #aaa' }}
               required
+              onInput={e => {
+                const el = e.currentTarget;
+                const lineHeight = 24; // Approximate line height in px
+                const prevRows = el.rows;
+                el.rows = 2; // Reset to min rows
+                const currentRows = Math.floor(el.scrollHeight / lineHeight);
+                if (currentRows > prevRows) {
+                  setTextareaRows(currentRows);
+                } else if (currentRows < prevRows) {
+                  setTextareaRows(currentRows);
+                }
+                el.rows = currentRows;
+              }}
             />
             <br />
-            <button type="submit" style={{ fontSize: 20, padding: '4px 18px', borderRadius: 6, border: '1px solid #888', cursor: 'pointer' }}>Send</button>
+            <button type="submit" style={{ fontSize: 20, padding: '4px 18px', borderRadius: 6, border: '1px solid #888', cursor: 'pointer', color: '#000' }}>Send</button>
           </form>
         )}
       </div>

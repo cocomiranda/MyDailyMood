@@ -251,6 +251,7 @@ function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [dotsView, setDotsView] = useState(false);
   const [showAllMoods, setShowAllMoods] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   useEffect(() => {
     const match = window.matchMedia('(prefers-color-scheme: dark)');
@@ -322,10 +323,10 @@ function App() {
     const topEmotions = Object.entries(emotionCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
-      .map(([emotion, count]) => `${emotion} (${count} times)`);
+      .map(([emotion]) => `${emotion}`);
 
     // Generate summary text
-    let summary = `Based on your ${total} mood entries:\n\n`;
+    let summary = "";
     
     if (positivePercent > 60) {
       summary += "You've been experiencing predominantly positive emotions. ";
@@ -396,9 +397,9 @@ function App() {
           </button>
           <button
             className={showAllMoods ? 'active' : ''}
-            onClick={() => {setShowAllMoods(true); setTimeRange(null); setChartView(false); setDotsView(false);}}
+            onClick={() => {setShowAllMoods(true); setTimeRange(null); setChartView(false); setDotsView(false); setShowSummary(false);}}
           >
-            All Moods
+            AI Insights
           </button>
         </div>
         {(timeRange || showAllMoods) && (
@@ -429,14 +430,6 @@ function App() {
 
         {showAllMoods ? (
           <div className="all-moods-list">
-            <h3>All Available Moods:</h3>
-            <ul>
-              {EMOTIONS.map((emotion) => (
-                <li key={emotion} style={{ color: getColor(emotion) }}>
-                  {emotion}
-                </li>
-              ))}
-            </ul>
             <div className="mood-summary">
               <h4>Your Mood Summary</h4>
               <p style={{ whiteSpace: 'pre-line', textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.4' }}>

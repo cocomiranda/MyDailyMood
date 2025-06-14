@@ -146,7 +146,7 @@ function scheduleDailyNotification() {
     if (permission !== 'granted') return;
     const now = new Date();
     const target = new Date();
-    target.setHours(11, 30, 0, 0); // 11:30 local time
+    target.setHours(18, 40, 0, 0); // 11:30 local time
     if (now > target) {
       // If it's already past 11:30 today, schedule for tomorrow
       target.setDate(target.getDate() + 1);

@@ -462,6 +462,7 @@ h1 {
   justify-content: flex-start; /* Aligns items to the left */
   flex-direction: column;
   /* margin-top: -0.5rem; */
+  margin-left: 10rem; /* Optional: adds space between the number and the flame */
   gap: 0.1rem;
   color: #FF6B2C;
   max-height: 2rem;
@@ -664,3 +665,4 @@ h1 {
 .dark-mode .mood-summary p {
   color: #ddd;
 }
+

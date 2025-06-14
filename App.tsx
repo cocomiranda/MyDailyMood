@@ -290,6 +290,7 @@ function App() {
   const [dotsView, setDotsView] = useState(false);
   const [showAllMoods, setShowAllMoods] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(false);
 
   useEffect(() => {
     const match = window.matchMedia('(prefers-color-scheme: dark)');
@@ -401,8 +402,6 @@ function App() {
       </header>
 
       <div className="content-wrapper">
-        
-        
         {/* Swipable Mood Carousel */}
         <div className="emotion-bubbles">
           {EMOTIONS.map((emotion: string, index: number) => (
@@ -546,8 +545,11 @@ function App() {
           </div>
         ) : (timeRange) && <p>No mood entries for this period.</p>}
 
-        <DayStreak moodEntries={moodEntries} />
-
+      </div> {/* End of .content-wrapper */}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+        <div style={{ width: '100%', maxWidth: 320 }}>
+          <DayStreak moodEntries={moodEntries} />
+        </div>
       </div>
       <div className="stripe-button" >
           <stripe-buy-button
@@ -555,6 +557,49 @@ function App() {
             publishable-key="pk_live_51REBRxIHQQKGPcYUkWysXhVOgYOdPkYAi6kUlcmwxrVWizeyCqyYpXrJthpEAncJxi6kyYNdqyFvvFxPXNsnF7wv00Hmb1MOGe"
           >
           </stripe-buy-button>
+      </div>
+
+      {/* Contact Form for Telegram (below Support us) */}
+      <div style={{ margin: '24px auto', maxWidth: 500 }}>
+        <label
+          htmlFor="texto"
+          style={{ display: 'block', marginBottom: 6, fontWeight: 500, fontSize: 18, cursor: 'pointer' }}
+          onClick={() => setShowContactForm(true)}
+        >
+          Contact us:
+        </label>
+        {showContactForm && (
+          <form
+            id="mensajeForm"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              const texto = (document.getElementById("texto") as HTMLTextAreaElement).value;
+              const token = '7491683166:AAEDDKIfGSeTwKeHHP2oslgBLvFo2o-V6Gs';
+              const chatId = '-4566675520';
+              try {
+                const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(texto)}`);
+                if (response.ok) {
+                  alert("Mensaje enviado correctamente.");
+                } else {
+                  alert("No se pudo enviar el mensaje.");
+                }
+              } catch (error) {
+                alert("Error enviando el mensaje.");
+              }
+              (document.getElementById("texto") as HTMLTextAreaElement).value = "";
+            }}
+          >
+            <textarea
+              id="texto"
+              name="texto"
+              rows={4}
+              style={{ width: '100%', marginBottom: 10, fontSize: 16, padding: 8, borderRadius: 6, border: '1px solid #aaa' }}
+              required
+            />
+            <br />
+            <button type="submit" style={{ fontSize: 20, padding: '4px 18px', borderRadius: 6, border: '1px solid #888', cursor: 'pointer' }}>Send</button>
+          </form>
+        )}
       </div>
       <Analytics />
     </div>

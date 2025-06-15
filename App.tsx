@@ -398,7 +398,7 @@ function App() {
   return (
     <div className={`app${isDarkMode ? ' dark-mode' : ''}`}>
       <header className="header">
-        <h1 className="app-title">MyDailyMood</h1>
+        <h1 className="app-title">DailyMood</h1>
         <p className="app-tagline">Little check-ins, big self-care.</p>
         <p className="date-display">{formatDate(new Date())}</p>
       </header>

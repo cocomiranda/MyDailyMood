@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mydailymood-v1';
+const CACHE_NAME = 'dailymood-v1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -75,7 +75,7 @@ self.addEventListener('push', event => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('MyDailyMood', options)
+    self.registration.showNotification('DailyMood', options)
   );
 });
 

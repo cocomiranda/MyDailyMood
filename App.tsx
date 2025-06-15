@@ -312,13 +312,13 @@ function App() {
 
   const handleEmotionClick = (emotion: string) => {
     if (hasEntryForToday(moodEntries)) {
-      alert("Mood NOT saved. You've already recorded today's mood — try again tomorrow!")
+      alert("Oops! You've already logged your mood today — Come back tomorrow!")
       return
     }
     saveMoodEntry(emotion)
     const updatedEntries = getMoodEntries();
     setMoodEntries(updatedEntries);
-    alert(moodMessages[emotion] || "Thanks for logging your mood for today! Come back tomorrow to log your next one.")
+    alert("Thanks for checking in — you're all set for today!")
   }
 
   const formatDate = (date: Date) => {

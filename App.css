@@ -458,38 +458,43 @@ h1 {
   padding: 1rem;
   background: #fff;
   border-radius: 16px;
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); */
 }
 
 .streak-flame {
   display: flex;
-  align-items: center; /* Aligns items vertically */
-  justify-content: flex-start; /* Aligns items to the left */
-  flex-direction: column;
-  /* margin-top: -0.5rem; */
-  margin-left: 10rem; /* Optional: adds space between the number and the flame */
-  gap: 0.1rem;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 0.5rem;
   color: #FF6B2C;
   max-height: 2rem;
 }
 
 .streak-number {
-  margin-right: 14.5rem; /* Optional: adds space between the number and the flame */
-  /* margin-top: 4rem; */
-  justify-content: flex-start; /* Aligns items to the left */
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 600;
   line-height: 1;
-  background: linear-gradient(45deg, #FF6B2C, #FF8F50);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .streak-text {
   font-size: 0.9rem;
-  margin-top: -1.5rem;
-  margin-left: -8rem;
   color: #666;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+/* Dark mode styles for streak */
+.dark-mode .streak-container {
+  background: #202836;
+  color: #f1f1f1;
+}
+
+.dark-mode .streak-text {
+  color: #f1f1f1;
 }
 
 #streak {

@@ -44,24 +44,24 @@ const DayStreak = ({ moodEntries }: { moodEntries: MoodEntry[] }) => {
 
   if (streak === 0) return null;
 
+  const getStreakEmoji = () => {
+    if (streak >= 30) return '🌈';
+    if (streak >= 7) return '🧠';
+    return '🔥';
+  };
+
+  const getStreakText = () => {
+    if (streak >= 30) return 'day streak';
+    if (streak >= 7) return 'day streak';
+    return 'day streak';
+  };
+
   return (
     <div className="streak-container">
       <div className="streak-flame">
-        <span className="streak-number">{streak} </span>
-        <span className="streak-text">day streak!</span>
-        <svg id="streak" transform="translate(1.000000, 1.000000)" fillRule="nonzero">
-          <g fill="#FF9600" stroke="#FFFFFF" strokeWidth="2">
-            <path d="M0.068,15.675 L0.044,7.216 C0.039,5.334 1.25,3.942 3.056,4.246 C3.413,4.306 3.998,4.491 4.306,4.656 L5.997,5.561 L9.247,1.464 C9.79255754,0.776391272 10.6222536,0.37555895 11.5,0.37555895 C12.3777464,0.37555895 13.2074425,0.776391272 13.753,1.464 L20.523,10 C22.1231469,11.939276 22.9988566,14.3747884 23,16.889 C23,23.034 17.843,28 11.5,28 C5.157,28 0,23.034 0,16.889 C0,16.481 0.023,16.076 0.068,15.675 Z" />
-          </g>
-          <g transform="translate(7.000000, 11.000000)" fill="#FFC800">
-            <path d="M1.012,5.077 C1.02645313,5.04002851 1.04561094,5.00507392 1.069,4.973 L3.719,1.364 C3.89306825,1.12674185 4.1697362,0.986581193 4.464,0.986581193 C4.7582638,0.986581193 5.03493175,1.12674185 5.209,1.364 L7.732,4.8 C8.54117469,5.59477404 8.99791508,6.68079318 9,7.815 C9,10.208 6.985,12.148 4.5,12.148 C2.015,12.148 0,10.208 0,7.815 C0,6.776 0.38,5.823 1.012,5.077 Z" />
-          </g>
-        </svg>
-        
+        <span className="streak-number">{getStreakEmoji()} {streak}</span>
+        <span className="streak-text">{getStreakText()}</span>
       </div>
-      {/* <p className="streak-info">
-        A <span className="streak-highlight">streak</span> counts how many days you've practiced in a row
-      </p> */}
     </div>
   );
 };

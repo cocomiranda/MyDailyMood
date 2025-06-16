@@ -397,6 +397,7 @@ function App() {
 
   return (
     <div className={`app${isDarkMode ? ' dark-mode' : ''}`}>
+      <Analytics />
       <header className="header">
         <h1 className="app-title">DailyMood</h1>
         <p className="app-tagline">Little check-ins, big self-care.</p>
@@ -617,7 +618,6 @@ function App() {
           </form>
         )}
       </div>
-      <Analytics />
     </div>
   )
 }

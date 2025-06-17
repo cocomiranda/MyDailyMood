@@ -510,16 +510,26 @@ function App() {
     let summaryText = '';
     if (emotionGroup && mostFrequentEmotion) {
       const template = getRandomTemplate(emotionGroup);
-      summaryText = `Based on your recent entries, ${template}`;
+      const casualIntros = [
+        `Looking at your mood patterns, ${template}`,
+        `From what I can see, ${template}`,
+        `Based on your mood journey, ${template}`
+      ];
+      summaryText = casualIntros[Math.floor(Math.random() * casualIntros.length)];
     }
 
     // Add note about insufficient records if applicable
     if (hasInsufficientRecords) {
-      summaryText += `\n\nNote: You've recorded fewer than half of the expected entries for this ${timeRange}.`;
+      const casualNotes = [
+        `Hey, I notice you haven't logged many moods this ${timeRange}. Want to share more?`,
+        `Just a heads up - you've only logged a few moods this ${timeRange}. How about adding some more?`,
+        `I see you're taking it easy with the mood logging this ${timeRange}. Feel free to add more when you're ready!`
+      ];
+      summaryText += `\n\n${casualNotes[Math.floor(Math.random() * casualNotes.length)]}`;
     }
 
     return summaryText;
-mon  };
+  };
 
   return (
     <div className={`app${isDarkMode ? ' dark-mode' : ''}`}>

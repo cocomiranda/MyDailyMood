@@ -353,6 +353,15 @@ const balancedTemplates = [
   "you've had a balanced emotional experience."
 ];
 
+// Define friendly messages for repetitive emotions (progressively shorter versions)
+const friendlyRepetitiveMessages = [
+  (emotion: string, count: number, dayName: string) => `It looks like ${emotion} was a recurring theme on ${dayName}s, happening ${count} times. Keep an eye on that pattern.`,
+  (emotion: string, count: number, dayName: string) => `You consistently felt ${emotion} on ${dayName}s, ${count} times. Interesting!`,
+  (emotion: string, count: number, dayName: string) => `Trend: ${emotion} ${count} times on ${dayName}s.`,
+  (emotion: string, count: number, dayName: string) => `${emotion} on ${dayName}s, ${count}x.`,
+  (emotion: string, count: number, dayName: string) => `${emotion} x${count}.`,
+];
+
 function App() {
   const [moodEntries, setMoodEntries] = useState<MoodEntry[]>(getMoodEntries());
   const [stats, setStats] = useState<MoodStats>(calculateStats(moodEntries));
@@ -470,8 +479,57 @@ function App() {
     let summary = `For ${timeFrameText}, ${randomTemplate} `;
     summary += `Your most frequent emotions were ${topEmotions.join(', ')}.\n\n`;
 
-    // Check for repeated emotions on same weekdays (only for month view)
-    if (timeRange === 'month' || timeRange === 'year') {
+    if (timeRange === 'month') {
+      // Add logic to check for repetitive emotions on the same day of the week
+      const repetitiveEmotions = new Map();
+
+      entries.forEach(entry => {
+        const date = new Date(entry.timestamp);
+        const dayOfWeek = date.getDay();
+        const key = `${dayOfWeek}-${entry.emotion}`;
+        repetitiveEmotions.set(key, (repetitiveEmotions.get(key) || 0) + 1);
+      });
+
+      // Update logic to use first message for first occurrence, and combine subsequent ones
+      let repetitiveEmotionNotes: string[] = [];
+      const repetitiveEntriesData: { dayName: string; emotion: string; count: number }[] = [];
+
+      repetitiveEmotions.forEach((count, key) => {
+        if (count >= 2) {
+          const [dayOfWeek, emotion] = key.split('-');
+          const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parseInt(dayOfWeek)];
+          repetitiveEntriesData.push({ dayName, emotion, count });
+        }
+      });
+
+      if (repetitiveEntriesData.length > 0) {
+        // First repetitive emotion
+        const firstEntry = repetitiveEntriesData[0];
+        const firstMessage = friendlyRepetitiveMessages[0](firstEntry.emotion, firstEntry.count, firstEntry.dayName);
+        repetitiveEmotionNotes.push(firstMessage);
+
+        // Subsequent repetitive emotions
+        if (repetitiveEntriesData.length > 1) {
+          const otherEntries = repetitiveEntriesData.slice(1);
+          const dayNames = otherEntries.map(entry => `${entry.dayName}s`);
+          const emotionsList = otherEntries.map(entry => entry.emotion);
+
+          let combinedOtherMessage = `This is also happening on ${dayNames.join(' and ')}`; // Start with days
+          if (emotionsList.length > 0) {
+            combinedOtherMessage += `, showing emotions ${emotionsList.join(' and ')} respectively.`;
+          }
+
+          repetitiveEmotionNotes.push(combinedOtherMessage);
+        }
+      }
+
+      if (repetitiveEmotionNotes.length > 0) {
+        summary += `\n${repetitiveEmotionNotes.join('\n')}\n`;
+      }
+    }
+
+    if (timeRange === 'year') {
+      // Repeated emotions by day of month for year timeframe
       const dayOfMonthEmotions = entries.reduce((acc, entry) => {
         const date = new Date(entry.timestamp);
         const dayOfMonth = date.getDate();
@@ -503,7 +561,7 @@ function App() {
         summary += '\n';
       }
 
-      // Check for emotion group streaks
+      // Largest positive and challenging streaks for year timeframe
       const getEmotionGroup = (emotion: string) => {
         if (emotionCategories.positive.includes(emotion)) return 'positive';
         if (emotionCategories.neutral.includes(emotion)) return 'neutral';
@@ -558,6 +616,151 @@ function App() {
         summary += `Your largest challenging streak was ${largestChallengingStreak.length} days in ${month}.\n`;
       }
 
+    } else if (timeRange === 'month') {
+      // Repeated emotions by day of month for month timeframe
+      const dayOfMonthEmotions = entries.reduce((acc, entry) => {
+        const date = new Date(entry.timestamp);
+        const dayOfMonth = date.getDate();
+        if (!acc[dayOfMonth]) acc[dayOfMonth] = {};
+        acc[dayOfMonth][entry.emotion] = (acc[dayOfMonth][entry.emotion] || 0) + 1;
+        return acc;
+      }, {} as Record<number, Record<string, number>>);
+
+      const repeatedEmotions = Object.entries(dayOfMonthEmotions)
+        .filter(([_, emotions]) => Object.values(emotions).some(count => count >= 2))
+        .map(([dayOfMonth, emotions]) => {
+          const repeated = Object.entries(emotions)
+            .filter(([_, count]) => count >= 2)
+            .map(([emotion, count]) => ({ emotion, count }));
+          
+          const totalCount = repeated.reduce((sum, item) => sum + item.count, 0);
+          return { dayOfMonth: parseInt(dayOfMonth), patterns: repeated, totalCount };
+        })
+        .sort((a, b) => b.totalCount - a.totalCount)
+        .slice(0, 2);
+
+      if (repeatedEmotions.length > 0) {
+        summary += "You've shown some consistent patterns:\n";
+        repeatedEmotions.forEach(patternData => {
+          const patternsText = patternData.patterns.map(p => `${p.emotion} (${p.count} times)`).join(', ');
+          summary += `• Day ${patternData.dayOfMonth}: ${patternsText}\n`;
+        });
+        summary += '\n';
+      }
+
+      // Largest streak for month timeframe
+      const getEmotionGroup = (emotion: string) => {
+        if (emotionCategories.positive.includes(emotion)) return 'positive';
+        if (emotionCategories.neutral.includes(emotion)) return 'neutral';
+        if (emotionCategories.challenging.includes(emotion)) return 'challenging';
+        return null;
+      };
+
+      const sortedEntries = [...entries].sort((a, b) => a.timestamp - b.timestamp);
+      let maxStreak = 0;
+      let maxStreakGroup: string | null = null;
+
+      if (sortedEntries.length > 0) {
+        let currentStreak = 1;
+        let currentGroup = getEmotionGroup(sortedEntries[0].emotion);
+
+        for (let i = 1; i < sortedEntries.length; i++) {
+          const group = getEmotionGroup(sortedEntries[i].emotion);
+          if (group === currentGroup) {
+            currentStreak++;
+          } else {
+            if (currentStreak > maxStreak) {
+              maxStreak = currentStreak;
+              maxStreakGroup = currentGroup;
+            }
+            currentStreak = 1;
+            currentGroup = group;
+          }
+        }
+        // Check the last streak
+        if (currentStreak > maxStreak) {
+          maxStreak = currentStreak;
+          maxStreakGroup = currentGroup;
+        }
+      }
+
+      if (maxStreak >= 3) { // Consider streaks of 3 days or more for monthly view
+        const groupName = maxStreakGroup === 'positive' ? 'positive' :
+                          maxStreakGroup === 'challenging' ? 'challenging' :
+                          'balanced';
+        summary += `\nYou had your largest streak of ${maxStreak} days in ${groupName} emotions this month.\n\n`;
+      }
+
+    } else if (timeRange === 'week') {
+      // Repetitive emotions by day of the week for week timeframe
+      const weekdayEmotions = entries.reduce((acc, entry) => {
+        const date = new Date(entry.timestamp);
+        const weekday = (date.getDay() + 6) % 7; // Monday = 0, Sunday = 6
+        if (!acc[weekday]) acc[weekday] = {};
+        acc[weekday][entry.emotion] = (acc[weekday][entry.emotion] || 0) + 1;
+        return acc;
+      }, {} as Record<number, Record<string, number>>);
+
+      const weekdayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const repeatedWeekdayEmotions = Object.entries(weekdayEmotions)
+        .filter(([_, emotions]) => Object.values(emotions).some(count => count >= 2))
+        .map(([weekday, emotions]) => {
+          const repeated = Object.entries(emotions)
+            .filter(([_, count]) => count >= 2)
+            .map(([emotion, count]) => `${emotion} (${count} times)`);
+          return `${weekdayNames[parseInt(weekday)]}: ${repeated.join(', ')}`;
+        });
+      
+      if (repeatedWeekdayEmotions.length > 0) {
+        summary += "You've shown some consistent patterns this week:\n";
+        repeatedWeekdayEmotions.forEach(pattern => {
+          summary += `• ${pattern}\n`;
+        });
+        summary += '\n';
+      }
+
+      // Largest streak for week timeframe
+      const getEmotionGroup = (emotion: string) => {
+        if (emotionCategories.positive.includes(emotion)) return 'positive';
+        if (emotionCategories.neutral.includes(emotion)) return 'neutral';
+        if (emotionCategories.challenging.includes(emotion)) return 'challenging';
+        return null;
+      };
+
+      const sortedEntries = [...entries].sort((a, b) => a.timestamp - b.timestamp);
+      let maxStreak = 0;
+      let maxStreakGroup: string | null = null;
+
+      if (sortedEntries.length > 0) {
+        let currentStreak = 1;
+        let currentGroup = getEmotionGroup(sortedEntries[0].emotion);
+
+        for (let i = 1; i < sortedEntries.length; i++) {
+          const group = getEmotionGroup(sortedEntries[i].emotion);
+          if (group === currentGroup) {
+            currentStreak++;
+          } else {
+            if (currentStreak > maxStreak) {
+              maxStreak = currentStreak;
+              maxStreakGroup = currentGroup;
+            }
+            currentStreak = 1;
+            currentGroup = group;
+          }
+        }
+        // Check the last streak
+        if (currentStreak > maxStreak) {
+          maxStreak = currentStreak;
+          maxStreakGroup = currentGroup;
+        }
+      }
+
+      if (maxStreak >= 2) { // Consider streaks of 2 days or more for weekly view
+        const groupName = maxStreakGroup === 'positive' ? 'positive' :
+                          maxStreakGroup === 'challenging' ? 'challenging' :
+                          'balanced';
+        summary += `You had a ${maxStreak}-day streak of ${groupName} emotions this week.\n\n`;
+      }
     }
 
     if (positivePercent > 70) {

@@ -4,5 +4,6 @@ declare namespace JSX {
       buyButtonId: string;
       publishableKey: string;
     }
+    "stripe-buy-button": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   }
 } 

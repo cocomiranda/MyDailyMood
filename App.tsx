@@ -192,55 +192,127 @@ function getColor(emotion: string | null) {
 
 function getDaysArray(range: 'week' | 'month' | 'year') {
   const today = new Date();
-  let days = 7;
-  if (range === 'month') days = 30;
-  if (range === 'year') days = 365;
-  return Array.from({ length: days }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - (days - 1 - i));
-    d.setHours(0, 0, 0, 0);
-    return d;
-  });
+  if (range === 'year') {
+    const yearlyData = [];
+    const currentYear = today.getFullYear();
+
+    for (let month = 0; month < 12; month++) {
+      const firstDayOfMonth = new Date(currentYear, month, 1);
+      const lastDayOfMonth = new Date(currentYear, month + 1, 0);
+      const daysInMonth = lastDayOfMonth.getDate();
+      const firstDayWeekday = (firstDayOfMonth.getDay() + 6) % 7; // 0 for Monday, 1 for Tuesday, etc.
+
+      const monthDays = [];
+
+      // Add nulls for padding at the beginning of the month to align with weekday
+      for (let i = 0; i < firstDayWeekday; i++) {
+        monthDays.push(null);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, month, day);
+        date.setHours(0, 0, 0, 0);
+        monthDays.push(date);
+      }
+      yearlyData.push(monthDays);
+    }
+    return yearlyData;
+
+  } else {
+    let days = 7;
+    if (range === 'month') days = 30;
+    return Array.from({ length: days }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - (days - 1 - i));
+      d.setHours(0, 0, 0, 0);
+      return d;
+    });
+  }
 }
 
 function DotsGrid({ moodEntries, range }: { moodEntries: MoodEntry[]; range: 'week' | 'month' | 'year' }) {
-  const days = getDaysArray(range);
+  const data = getDaysArray(range);
   // Map date string to emotion
   const entryMap = Object.fromEntries(
     moodEntries.map(e => [new Date(e.timestamp).toDateString(), e.emotion])
   );
   // Responsive columns and dot size
-  let columns = 7, dot = 16, gap = 4, gridWidth: number | undefined = 180, fullWidth = false;
-  if (range === 'year') { columns = 21; dot = 13; gap = 2; gridWidth = undefined; fullWidth = true; }
-  return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(${columns}, 1fr)` ,
-      gap,
-      justifyContent: 'center',
-      margin: '0 auto',
-      maxWidth: gridWidth,
-      width: fullWidth ? '100%' : gridWidth,
-      marginTop: 12
-    }}>
-      {days.map((date, i) => (
-        <div
-          key={date.toISOString()}
-          title={date.toDateString() + (entryMap[date.toDateString()] ? `: ${entryMap[date.toDateString()]}` : '')}
-          style={{
-            width: dot,
-            height: dot,
-            borderRadius: '50%',
-            background: getColor(entryMap[date.toDateString()] || null),
-            border: '1px solid #ccc',
-            margin: 0,
-            display: 'inline-block',
-            boxSizing: 'border-box',
-          }}
-        />
-      ))}
-    </div>
-  );
+  let columns = 7, dot = 16, gap = 4, gridWidth: number | string | undefined = 180, fullWidth = false;
+
+  if (range === 'year') { 
+    columns = 7; // Calendar view will have 7 columns (days of week)
+    dot = 8;     // Smaller dots for yearly view
+    gap = 2;     // Smaller gap
+
+    return (
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '10px', // Gap between months
+        width: '100%',
+        margin: '0 auto',
+      }}>
+        {(data as (Date | null)[][]).map((monthDays, monthIndex) => (
+          <div key={monthIndex} style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, 1fr)`,
+            gap: gap,
+            width: `calc(${columns} * ${dot}px + (${columns} - 1) * ${gap}px)`, // width for 7 dots and their gaps
+            boxSizing: 'content-box',
+          }}>
+            {monthDays.map((date, i) => (
+              <div
+                key={date ? date.toISOString() : `empty-${monthIndex}-${i}`}
+                title={date ? date.toDateString() + (entryMap[date.toDateString()] ? `: ${entryMap[date.toDateString()]}` : '') : ''}
+                style={{
+                  width: dot,
+                  height: dot,
+                  borderRadius: '50%',
+                  background: date ? getColor(entryMap[date.toDateString()] || null) : 'transparent',
+                  border: date ? '1px solid #ccc' : 'none',
+                  margin: 0,
+                  display: 'inline-block',
+                  boxSizing: 'border-box',
+                }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+
+  } else {
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${columns}, 1fr)` ,
+        gap,
+        justifyContent: 'center',
+        margin: '0 auto',
+        maxWidth: gridWidth,
+        width: fullWidth ? '100%' : gridWidth,
+        marginTop: 12
+      }}>
+        {(data as Date[]).map((date, i) => (
+          <div
+            key={date.toISOString()}
+            title={date.toDateString() + (entryMap[date.toDateString()] ? `: ${entryMap[date.toDateString()]}` : '')}
+            style={{
+              width: dot,
+              height: dot,
+              borderRadius: '50%',
+              background: getColor(entryMap[date.toDateString()] || null),
+              border: '1px solid #ccc',
+              margin: 0,
+              display: 'inline-block',
+              boxSizing: 'border-box',
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
 }
 
 // Message templates for variety
@@ -292,6 +364,8 @@ function App() {
   const [showSummary, setShowSummary] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
   const [textareaRows, setTextareaRows] = useState(2);
+  const [isLoadingBlueprint, setIsLoadingBlueprint] = useState(false);
+  const [thinkingDots, setThinkingDots] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
@@ -309,6 +383,18 @@ function App() {
   useEffect(() => {
     scheduleDailyNotification();
   }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoadingBlueprint) {
+      interval = setInterval(() => {
+        setThinkingDots(prev => (prev + 1) % 4);
+      }, 300);
+    } else {
+      setThinkingDots(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoadingBlueprint]);
 
   const handleEmotionClick = (emotion: string) => {
     if (hasEntryForToday(moodEntries)) {
@@ -336,9 +422,9 @@ function App() {
 
     // Group emotions by category
     const emotionCategories = {
-      positive: ['Hopeful', 'Confident', 'Cheerful', 'Pleasant', 'Pleased', 'Playful', 'Good', 'Calm', 'Chill'],
-      neutral: ['Curious', 'Thoughtful', 'Bored'],
-      challenging: ['Tense', 'Uneasy', 'Tired', 'Fatigued']
+      positive: ['Hopeful', 'Confident', 'Excited', 'Playful', 'Grateful', 'Cheerful', 'Content', 'Inspired'],
+      neutral: ['Curious', 'Calm', 'Chill', 'Thoughtful', 'Bored', 'Observant', 'Indifferent', 'Contemplative'],
+      challenging: ['Frustrated', 'Anxious', 'Uneasy', 'Tense', 'Tired', 'Fatigued', 'Lonely', 'Overwhelmed']
     };
 
     // Count emotions by category
@@ -384,12 +470,102 @@ function App() {
     let summary = `For ${timeFrameText}, ${randomTemplate} `;
     summary += `Your most frequent emotions were ${topEmotions.join(', ')}.\n\n`;
 
+    // Check for repeated emotions on same weekdays (only for month view)
+    if (timeRange === 'month' || timeRange === 'year') {
+      const dayOfMonthEmotions = entries.reduce((acc, entry) => {
+        const date = new Date(entry.timestamp);
+        const dayOfMonth = date.getDate();
+        if (!acc[dayOfMonth]) acc[dayOfMonth] = {};
+        acc[dayOfMonth][entry.emotion] = (acc[dayOfMonth][entry.emotion] || 0) + 1;
+        return acc;
+      }, {} as Record<number, Record<string, number>>);
+
+      const repeatedEmotions = Object.entries(dayOfMonthEmotions)
+        .filter(([_, emotions]) => Object.values(emotions).some(count => count >= 2))
+        .map(([dayOfMonth, emotions]) => {
+          const repeated = Object.entries(emotions)
+            .filter(([_, count]) => count >= 2)
+            .map(([emotion, count]) => ({ emotion, count })); // Store as object to sort by count
+          
+          // Calculate total count for sorting this pattern
+          const totalCount = repeated.reduce((sum, item) => sum + item.count, 0);
+          return { dayOfMonth: parseInt(dayOfMonth), patterns: repeated, totalCount };
+        })
+        .sort((a, b) => b.totalCount - a.totalCount) // Sort by total count of occurrences
+        .slice(0, 2); // Take only the top 2
+
+      if (repeatedEmotions.length > 0) {
+        summary += "You've shown some consistent patterns:\n";
+        repeatedEmotions.forEach(patternData => {
+          const patternsText = patternData.patterns.map(p => `${p.emotion} (${p.count} times)`).join(', ');
+          summary += `• Day ${patternData.dayOfMonth}: ${patternsText}\n`;
+        });
+        summary += '\n';
+      }
+
+      // Check for emotion group streaks
+      const getEmotionGroup = (emotion: string) => {
+        if (emotionCategories.positive.includes(emotion)) return 'positive';
+        if (emotionCategories.neutral.includes(emotion)) return 'neutral';
+        if (emotionCategories.challenging.includes(emotion)) return 'challenging';
+        return null;
+      };
+
+      const sortedEntries = [...entries].sort((a, b) => a.timestamp - b.timestamp);
+      const allStreaks: { length: number; group: string | null; startDate: Date }[] = [];
+      
+      if (sortedEntries.length > 0) {
+        let currentStreak = 1;
+        let currentGroup = getEmotionGroup(sortedEntries[0].emotion);
+        let currentStreakStartDate = new Date(sortedEntries[0].timestamp);
+
+        for (let i = 1; i < sortedEntries.length; i++) {
+          const group = getEmotionGroup(sortedEntries[i].emotion);
+          if (group === currentGroup) {
+            currentStreak++;
+          } else {
+            if (currentStreak >= 4) {
+              allStreaks.push({ length: currentStreak, group: currentGroup, startDate: currentStreakStartDate });
+            }
+            currentStreak = 1;
+            currentGroup = group;
+            currentStreakStartDate = new Date(sortedEntries[i].timestamp);
+          }
+        }
+        // Push the last streak if it meets the criteria
+        if (currentStreak >= 4) {
+          allStreaks.push({ length: currentStreak, group: currentGroup, startDate: currentStreakStartDate });
+        }
+      }
+
+      const largestPositiveStreak = allStreaks
+        .filter(streak => streak.group === 'positive')
+        .sort((a, b) => b.length - a.length)[0];
+
+      const largestChallengingStreak = allStreaks
+        .filter(streak => streak.group === 'challenging')
+        .sort((a, b) => b.length - a.length)[0];
+
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+      if (largestPositiveStreak) {
+        const month = monthNames[largestPositiveStreak.startDate.getMonth()];
+        summary += `Your largest positive streak was ${largestPositiveStreak.length} days in ${month}.\n`;
+      }
+
+      if (largestChallengingStreak) {
+        const month = monthNames[largestChallengingStreak.startDate.getMonth()];
+        summary += `Your largest challenging streak was ${largestChallengingStreak.length} days in ${month}.\n`;
+      }
+
+    }
+
     if (positivePercent > 70) {
-      summary += "You're maintaining a very positive outlook!";
+      summary += "\n\nYou're maintaining a very positive outlook!";
     } else if (challengingPercent > 50) {
-      summary += "Remember that challenging emotions are temporary and part of the human experience.";
+      summary += "\n\nRemember that challenging emotions are temporary and part of the human experience.";
     } else {
-      summary += "You're showing good emotional balance in your daily life.";
+      summary += "\n\nYou're showing good emotional balance in your daily life.";
     }
 
     return summary;
@@ -431,6 +607,12 @@ function App() {
                 setShowAllMoods(false);
               } else {
                 setTimeRange('week');
+                if (showAllMoods) {
+                  setIsLoadingBlueprint(true);
+                  setTimeout(() => {
+                    setIsLoadingBlueprint(false);
+                  }, 1000);
+                }
               }
             }}
           >
@@ -444,6 +626,12 @@ function App() {
                 setShowAllMoods(false);
               } else {
                 setTimeRange('month');
+                if (showAllMoods) {
+                  setIsLoadingBlueprint(true);
+                  setTimeout(() => {
+                    setIsLoadingBlueprint(false);
+                  }, 1000);
+                }
               }
             }}
           >
@@ -457,6 +645,12 @@ function App() {
                 setShowAllMoods(false);
               } else {
                 setTimeRange('year');
+                if (showAllMoods) {
+                  setIsLoadingBlueprint(true);
+                  setTimeout(() => {
+                    setIsLoadingBlueprint(false);
+                  }, 1000);
+                }
               }
             }}
           >
@@ -468,6 +662,12 @@ function App() {
               onClick={() => {
                 setShowAllMoods(!showAllMoods);
                 setShowSummary(false);
+                if (!showAllMoods) {
+                  setIsLoadingBlueprint(true);
+                  setTimeout(() => {
+                    setIsLoadingBlueprint(false);
+                  }, 1000);
+                }
               }}
             >
               AI Insights
@@ -481,7 +681,7 @@ function App() {
               onClick={() => { setChartView(false); setDotsView(false); setShowAllMoods(false);}}
               style={{ fontSize: 12, padding: '2px 10px', border: (!chartView && !dotsView && !showAllMoods) ? '2px solid #333' : undefined }}
             >
-              List View
+              List
             </button>
             <button
               className="toggle-chart-view"
@@ -504,24 +704,33 @@ function App() {
           <div className="all-moods-list">
             <div className="mood-summary">
               <h4>Your Emotional Blueprint</h4>
-              <p style={{ whiteSpace: 'pre-line', textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.4' }}>
-                {generateMoodSummary(
-                  moodEntries.filter(entry => {
-                    if (timeRange === 'week') {
-                      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                      return entry.timestamp >= oneWeekAgo;
-                    } else if (timeRange === 'month') {
-                      const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-                      return entry.timestamp >= oneMonthAgo;
-                    } else if (timeRange === 'year') {
-                      const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
-                      return entry.timestamp >= oneYearAgo;
-                    }
-                    return false;
-                  }),
-                  timeRange
-                )}
-              </p>
+              {isLoadingBlueprint ? (
+                <div style={{ textAlign: 'center', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <span>AI is thinking</span>
+                  <span style={{ width: '24px', textAlign: 'left' }}>
+                    {'.'.repeat(thinkingDots)}
+                  </span>
+                </div>
+              ) : (
+                <p style={{ whiteSpace: 'pre-line', textAlign: 'left', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                  {generateMoodSummary(
+                    moodEntries.filter(entry => {
+                      if (timeRange === 'week') {
+                        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                        return entry.timestamp >= oneWeekAgo;
+                      } else if (timeRange === 'month') {
+                        const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+                        return entry.timestamp >= oneMonthAgo;
+                      } else if (timeRange === 'year') {
+                        const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+                        return entry.timestamp >= oneYearAgo;
+                      }
+                      return false;
+                    }),
+                    timeRange
+                  )}
+                </p>
+              )}
             </div>
           </div>
         ) : (timeRange && Object.values(stats[timeRange]).some(count => count > 0)) ? (

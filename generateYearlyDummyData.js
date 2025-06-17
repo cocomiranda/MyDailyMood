@@ -1,4 +1,4 @@
-// Generate dummy mood data for a full year and save to localStorage
+// Generate dummy mood data for a full year
 const emotions = [
   'Hopeful', 'Confident', 'Cheerful', 'Pleasant', 'Pleased', 'Playful',
   'Good', 'Calm', 'Chill', 'Curious', 'Thoughtful', 'Bored',
@@ -34,9 +34,6 @@ for (let i = 0; i < 365; i++) {
   }
 }
 
-// Save to localStorage
-localStorage.setItem('mood-tracker-entries', JSON.stringify(entries));
-
-console.log('Yearly dummy data generated and saved to localStorage');
+console.log('Yearly dummy data generated (not saved to localStorage).');
 console.log('Total entries:', entries.length);
 // console.log('Entries:', entries); // Uncomment this line if you want to see all entries in the console 

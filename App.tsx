@@ -218,9 +218,33 @@ function getDaysArray(range: 'week' | 'month' | 'year') {
     }
     return yearlyData;
 
-  } else {
+  } else if (range === 'month') {
+    const monthData = [];
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-indexed month
+
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+    const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+
+    // Calculate the day of the week for the 1st of the month (0 for Monday, 6 for Sunday)
+    const firstDayWeekday = (firstDayOfMonth.getDay() + 6) % 7;
+
+    // Add nulls for padding at the beginning of the month to align with weekday (Monday)
+    for (let i = 0; i < firstDayWeekday; i++) {
+      monthData.push(null);
+    }
+
+    // Add actual days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentYear, currentMonth, day);
+      date.setHours(0, 0, 0, 0);
+      monthData.push(date);
+    }
+    return monthData;
+
+  } else { // 'week' range
     let days = 7;
-    if (range === 'month') days = 30;
     return Array.from({ length: days }, (_, i) => {
       const d = new Date(today);
       d.setDate(today.getDate() - (days - 1 - i));
@@ -261,22 +285,25 @@ function DotsGrid({ moodEntries, range }: { moodEntries: MoodEntry[]; range: 'we
             width: `calc(${columns} * ${dot}px + (${columns} - 1) * ${gap}px)`, // width for 7 dots and their gaps
             boxSizing: 'content-box',
           }}>
-            {monthDays.map((date, i) => (
-              <div
-                key={date ? date.toISOString() : `empty-${monthIndex}-${i}`}
-                title={date ? date.toDateString() + (entryMap[date.toDateString()] ? `: ${entryMap[date.toDateString()]}` : '') : ''}
-                style={{
-                  width: dot,
-                  height: dot,
-                  borderRadius: '50%',
-                  background: date ? getColor(entryMap[date.toDateString()] || null) : 'transparent',
-                  border: date ? '1px solid #ccc' : 'none',
-                  margin: 0,
-                  display: 'inline-block',
-                  boxSizing: 'border-box',
-                }}
-              />
-            ))}
+            {monthDays.map((date, i) => {
+              const mood = date ? entryMap[date.toDateString()] : null;
+              return (
+                <div
+                  key={date ? date.toISOString() : `empty-${monthIndex}-${i}`}
+                  title={date ? date.toDateString() + (mood ? `: ${mood}` : '') : ''}
+                  style={{
+                    width: dot,
+                    height: dot,
+                    borderRadius: '50%',
+                    background: date ? getColor(mood || null) : 'transparent',
+                    border: date ? '1px solid #ccc' : 'none',
+                    margin: 0,
+                    display: 'inline-block',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              );
+            })}
           </div>
         ))}
       </div>
@@ -294,22 +321,25 @@ function DotsGrid({ moodEntries, range }: { moodEntries: MoodEntry[]; range: 'we
         width: fullWidth ? '100%' : gridWidth,
         marginTop: 12
       }}>
-        {(data as Date[]).map((date, i) => (
-          <div
-            key={date.toISOString()}
-            title={date.toDateString() + (entryMap[date.toDateString()] ? `: ${entryMap[date.toDateString()]}` : '')}
-            style={{
-              width: dot,
-              height: dot,
-              borderRadius: '50%',
-              background: getColor(entryMap[date.toDateString()] || null),
-              border: '1px solid #ccc',
-              margin: 0,
-              display: 'inline-block',
-              boxSizing: 'border-box',
-            }}
-          />
-        ))}
+        {(data as (Date | null)[]).map((date, i) => {
+          const mood = date ? entryMap[date.toDateString()] : null;
+          return (
+            <div
+              key={date ? date.toISOString() : `empty-${i}`}
+              title={date ? date.toDateString() + (mood ? `: ${mood}` : '') : ''}
+              style={{
+                width: dot,
+                height: dot,
+                borderRadius: '50%',
+                background: date ? getColor(mood || null) : 'transparent',
+                border: date ? '1px solid #ccc' : 'none',
+                margin: 0,
+                display: 'inline-block',
+                boxSizing: 'border-box',
+              }}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -511,14 +541,21 @@ function App() {
         // Subsequent repetitive emotions
         if (repetitiveEntriesData.length > 1) {
           const otherEntries = repetitiveEntriesData.slice(1);
-          const dayNames = otherEntries.map(entry => `${entry.dayName}s`);
-          const emotionsList = otherEntries.map(entry => entry.emotion);
 
-          let combinedOtherMessage = `This is also happening on ${dayNames.join(' and ')}`; // Start with days
-          if (emotionsList.length > 0) {
-            combinedOtherMessage += `, showing emotions ${emotionsList.join(' and ')} respectively.`;
-          }
+          // Group emotions by day name to avoid repeating day names
+          const groupedByDay: Record<string, string[]> = {};
+          otherEntries.forEach(entry => {
+            if (!groupedByDay[entry.dayName]) {
+              groupedByDay[entry.dayName] = [];
+            }
+            groupedByDay[entry.dayName].push(entry.emotion);
+          });
 
+          const formattedOccurrences = Object.entries(groupedByDay).map(([dayName, emotions]) => {
+            return `${dayName}s with ${emotions.join(' and ')}`;
+          });
+
+          let combinedOtherMessage = `This is also happening on ${formattedOccurrences.join(' and ')}.`;
           repetitiveEmotionNotes.push(combinedOtherMessage);
         }
       }
@@ -529,92 +566,27 @@ function App() {
     }
 
     if (timeRange === 'year') {
-      // Repeated emotions by day of month for year timeframe
-      const dayOfMonthEmotions = entries.reduce((acc, entry) => {
-        const date = new Date(entry.timestamp);
-        const dayOfMonth = date.getDate();
-        if (!acc[dayOfMonth]) acc[dayOfMonth] = {};
-        acc[dayOfMonth][entry.emotion] = (acc[dayOfMonth][entry.emotion] || 0) + 1;
-        return acc;
-      }, {} as Record<number, Record<string, number>>);
+      // Logic for dominant emotion
+      const sortedEmotionCounts = Object.entries(emotionCounts)
+        .sort(([, countA], [, countB]) => countB - countA);
 
-      const repeatedEmotions = Object.entries(dayOfMonthEmotions)
-        .filter(([_, emotions]) => Object.values(emotions).some(count => count >= 2))
-        .map(([dayOfMonth, emotions]) => {
-          const repeated = Object.entries(emotions)
-            .filter(([_, count]) => count >= 2)
-            .map(([emotion, count]) => ({ emotion, count })); // Store as object to sort by count
-          
-          // Calculate total count for sorting this pattern
-          const totalCount = repeated.reduce((sum, item) => sum + item.count, 0);
-          return { dayOfMonth: parseInt(dayOfMonth), patterns: repeated, totalCount };
-        })
-        .sort((a, b) => b.totalCount - a.totalCount) // Sort by total count of occurrences
-        .slice(0, 2); // Take only the top 2
+      if (sortedEmotionCounts.length > 1) {
+        const mostFrequentEmotion = sortedEmotionCounts[0];
+        const secondMostFrequentEmotion = sortedEmotionCounts[1];
 
-      if (repeatedEmotions.length > 0) {
-        summary += "You've shown some consistent patterns:\n";
-        repeatedEmotions.forEach(patternData => {
-          const patternsText = patternData.patterns.map(p => `${p.emotion} (${p.count} times)`).join(', ');
-          summary += `• Day ${patternData.dayOfMonth}: ${patternsText}\n`;
-        });
-        summary += '\n';
-      }
-
-      // Largest positive and challenging streaks for year timeframe
-      const getEmotionGroup = (emotion: string) => {
-        if (emotionCategories.positive.includes(emotion)) return 'positive';
-        if (emotionCategories.neutral.includes(emotion)) return 'neutral';
-        if (emotionCategories.challenging.includes(emotion)) return 'challenging';
-        return null;
-      };
-
-      const sortedEntries = [...entries].sort((a, b) => a.timestamp - b.timestamp);
-      const allStreaks: { length: number; group: string | null; startDate: Date }[] = [];
-      
-      if (sortedEntries.length > 0) {
-        let currentStreak = 1;
-        let currentGroup = getEmotionGroup(sortedEntries[0].emotion);
-        let currentStreakStartDate = new Date(sortedEntries[0].timestamp);
-
-        for (let i = 1; i < sortedEntries.length; i++) {
-          const group = getEmotionGroup(sortedEntries[i].emotion);
-          if (group === currentGroup) {
-            currentStreak++;
-          } else {
-            if (currentStreak >= 4) {
-              allStreaks.push({ length: currentStreak, group: currentGroup, startDate: currentStreakStartDate });
-            }
-            currentStreak = 1;
-            currentGroup = group;
-            currentStreakStartDate = new Date(sortedEntries[i].timestamp);
-          }
+        if (mostFrequentEmotion[1] - secondMostFrequentEmotion[1] >= 10) {
+          summary += `\nLooks like '${mostFrequentEmotion[0]}' was a truly dominant emotion this year, with ${mostFrequentEmotion[1]} logs!\n`;
         }
-        // Push the last streak if it meets the criteria
-        if (currentStreak >= 4) {
-          allStreaks.push({ length: currentStreak, group: currentGroup, startDate: currentStreakStartDate });
-        }
+      } else if (sortedEmotionCounts.length === 1) {
+        summary += `\nLooks like '${sortedEmotionCounts[0][0]}' was the only emotion logged this year, with ${sortedEmotionCounts[0][1]} logs!\n`;
       }
 
-      const largestPositiveStreak = allStreaks
-        .filter(streak => streak.group === 'positive')
-        .sort((a, b) => b.length - a.length)[0];
-
-      const largestChallengingStreak = allStreaks
-        .filter(streak => streak.group === 'challenging')
-        .sort((a, b) => b.length - a.length)[0];
-
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-      if (largestPositiveStreak) {
-        const month = monthNames[largestPositiveStreak.startDate.getMonth()];
-        summary += `Your largest positive streak was ${largestPositiveStreak.length} days in ${month}.\n`;
-      }
-
-      if (largestChallengingStreak) {
-        const month = monthNames[largestChallengingStreak.startDate.getMonth()];
-        summary += `Your largest challenging streak was ${largestChallengingStreak.length} days in ${month}.\n`;
-      }
+      // Display total for each emotion group (friendlier tone)
+      summary += `\nLooking back at your year, here's a quick overview of your emotional categories:\n`;
+      summary += `• Positive moods: ${categoryCounts.positive} entries\n`;
+      summary += `• Neutral moods: ${categoryCounts.neutral} logs\n`;
+      summary += `• Challenging moods: ${categoryCounts.challenging} times\n`;
+      summary += `\n`;
 
     } else if (timeRange === 'month') {
       // Repeated emotions by day of month for month timeframe
@@ -1043,7 +1015,5 @@ function isLightColor(color: string) {
   const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000
   return brightness > 155
 }
-
-
 
 export default App

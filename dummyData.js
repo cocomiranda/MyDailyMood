@@ -59,45 +59,45 @@ for (let i = 0; i < 9; i++) {
 }
 
 // Add a 5-day streak for this month
-const fiveDayStreakEmotion = 'Confident'; // Example emotion for the 5-day streak
-const fiveDayStreakStartDate = new Date(now);
-fiveDayStreakStartDate.setDate(now.getDate() - 5); // Start 5 days ago
+// const fiveDayStreakEmotion = 'Confident'; // Example emotion for the 5-day streak
+// const fiveDayStreakStartDate = new Date(now);
+// fiveDayStreakStartDate.setDate(now.getDate() - 5); // Start 5 days ago
 
-for (let i = 0; i < 5; i++) {
-  const date = new Date(fiveDayStreakStartDate);
-  date.setDate(fiveDayStreakStartDate.getDate() + i);
+// for (let i = 0; i < 5; i++) {
+//   const date = new Date(fiveDayStreakStartDate);
+//   date.setDate(fiveDayStreakStartDate.getDate() + i);
   
-  // Check if an entry already exists for this date, to avoid duplicates
-  const entryExists = entries.some(entry => {
-    const entryDate = new Date(entry.timestamp);
-    return entryDate.toDateString() === date.toDateString();
-  });
+//   // Check if an entry already exists for this date, to avoid duplicates
+//   const entryExists = entries.some(entry => {
+//     const entryDate = new Date(entry.timestamp);
+//     return entryDate.toDateString() === date.toDateString();
+//   });
   
-  if (!entryExists) {
-    entries.push({
-      id: crypto.randomUUID(),
-      emotion: fiveDayStreakEmotion,
-      timestamp: date.getTime()
-    });
-  }
-}
+//   if (!entryExists) {
+//     entries.push({
+//       id: crypto.randomUUID(),
+//       emotion: fiveDayStreakEmotion,
+//       timestamp: date.getTime()
+//     });
+//   }
+// }
 
-// Ensure the same emotion is added for two Thursdays
-const thursdayEmotion = 'Cheerful'; // Example emotion for Thursdays
-const thursdayDates = [];
+// Ensure the same emotion is added for two Mondays in the last month
+const mondayEmotion = 'Cheerful'; // Example emotion for Mondays
+const mondayDates = [];
 
-// Find two Thursdays in the last month
+// Find two Mondays in the last month
 for (let i = 0; i < 30; i++) {
   const date = new Date(now);
   date.setDate(now.getDate() - i);
-  if (date.getDay() === 4) { // 4 represents Thursday
-    thursdayDates.push(date);
-    if (thursdayDates.length === 2) break;
+  if (date.getDay() === 1) { // 1 represents Monday
+    mondayDates.push(date);
+    if (mondayDates.length === 2) break;
   }
 }
 
-// Add the same emotion for the two Thursdays
-thursdayDates.forEach(date => {
+// Add the same emotion for the two Mondays
+mondayDates.forEach(date => {
   const entryExists = entries.some(entry => {
     const entryDate = new Date(entry.timestamp);
     return entryDate.toDateString() === date.toDateString();
@@ -106,7 +106,7 @@ thursdayDates.forEach(date => {
   if (!entryExists) {
     entries.push({
       id: crypto.randomUUID(),
-      emotion: thursdayEmotion,
+      emotion: mondayEmotion,
       timestamp: date.getTime()
     });
   }

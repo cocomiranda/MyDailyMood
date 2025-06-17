@@ -57,8 +57,8 @@
 .date-display {
   font-size: 0.9rem;
   color: #999;
-  margin-top: 2rem;
-  margin-bottom: -0.5rem;
+  margin-top: 1rem;
+  margin-bottom: -1rem;
   font-weight: 300;
   letter-spacing: 1px;
   text-align: center;
@@ -163,7 +163,7 @@ h1 {
   display: flex;
   gap: 0.75rem;
   
-  margin: 2rem auto 1rem auto;
+  margin: 4rem auto 1rem auto;
   justify-content: center;
   width: 100%;
   max-width: 320px;

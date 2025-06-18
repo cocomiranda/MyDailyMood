@@ -254,8 +254,8 @@ h1 {
 }
 
 .stat-item[data-emotion] {
-  background-color: var(--${emotion.toLowerCase()}-color, #f0f0f0);
-  color: var(--${emotion.toLowerCase()}-text-color, #333);
+  background-color: #f0f0f0;
+  color: #333;
 }
 
 /* Apply specific background colors using CSS variables for each emotion in light mode */
@@ -596,140 +596,222 @@ h1 {
   background: #202836;
   color: #f1f1f1;
 }
+
+/* Apply dark mode to entire page */
+.dark-mode html,
+.dark-mode body,
+.dark-mode #root {
+  background: #202836;
+  color: #f1f1f1;
+}
+
+/* Update app background in dark mode */
+.dark-mode .app {
+  background-color: #202836;
+  color: #f1f1f1;
+}
+
+/* Dark mode styles for header elements */
+.dark-mode .app-title {
+  color: #f1f1f1;
+}
+
+.dark-mode .app-tagline {
+  color: #ccc;
+}
+
+.dark-mode .date-display {
+  color: #ccc;
+}
+
+/* Dark mode styles for contact form */
+.dark-mode form button[type="submit"] {
+  color: #fff !important;
+  background: #333;
+  border: 1px solid #555 !important;
+}
+
+.dark-mode form button[type="submit"]:hover {
+  background: #444;
+}
+
+.dark-mode textarea {
+  background: #333;
+  color: #f1f1f1;
+  border: 1px solid #555 !important;
+}
+
+.dark-mode textarea::placeholder {
+  color: #ccc;
+}
+
 .dark-mode .header,
 .dark-mode .content-wrapper {
   background: #202836;
   color: #f1f1f1;
 }
+
 .dark-mode .emotion-bubble {
   border: 1px solid #333;
 }
+
 .dark-mode .stats-controls button {
   background: #232323;
   color: #f1f1f1;
   border: 1px solid #444;
 }
+
 .dark-mode .stats-controls button.active {
   background: #333;
   color: #FFD600;
 }
+
 .dark-mode .toggle-chart-view {
   background: #232323;
   color: #FFD600;
   border: 1px solid #444;
 }
+
 .dark-mode .stats-grid .stat-item {
   background: #202836;
   color: #FFD600;
 }
+
 /* Mood-specific stat-item backgrounds for dark mode */
 .dark-mode .stat-item[data-emotion="Hopeful"] {
   background-color: var(--hopeful-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Confident"] {
   background-color: var(--confident-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Tense"] {
   background-color: var(--tense-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Uneasy"] {
   background-color: var(--uneasy-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Cheerful"] {
   background-color: var(--cheerful-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Curious"] {
   background-color: var(--curious-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Pleasant"] {
   background-color: var(--pleasant-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Pleased"] {
   background-color: var(--pleased-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Playful"] {
   background-color: var(--playful-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Bored"] {
   background-color: var(--bored-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Tired"] {
   background-color: var(--tired-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Fatigued"] {
   background-color: var(--fatigued-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Calm"] {
   background-color: var(--calm-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Good"] {
   background-color: var(--good-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Thoughtful"] {
   background-color: var(--thoughtful-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Chill"] {
   background-color: var(--chill-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Grateful"] {
   background-color: var(--grateful-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Inspired"] {
   background-color: var(--inspired-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Anxious"] {
   background-color: var(--anxious-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Motivated"] {
   background-color: var(--motivated-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Lonely"] {
   background-color: var(--lonely-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Excited"] {
   background-color: var(--excited-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Content"] {
   background-color: var(--content-color);
   color: #333;
 }
+
 .dark-mode .stat-item[data-emotion="Overwhelmed"] {
   background-color: var(--overwhelmed-color);
   color: #fff;
 }
+
 .dark-mode .stat-item[data-emotion="Frustrated"] {
   background-color: var(--frustrated-color);
   color: #fff;
 }
+
 .dark-mode .stats-grid .stat-item .count {
   color: inherit;
 }
+
 .dark-mode .streak-container {
   background: #202836;
   color: #FFD600;
 }
+
 .dark-mode .stripe-button {
   background: #202836;
 }

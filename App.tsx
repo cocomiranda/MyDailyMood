@@ -760,9 +760,9 @@ function App() {
               // const chatId = '-4566675520';
               const token = '6692167095:AAFxJv9mw2T0XYaREP4F9aTi70qZmDASMpU'; 
               const chatId = '-4578386742'; 
-              const message = '[extension]' 
+              const message = `[dailyMood] - ${texto}`;
               try {
-                const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(texto)}`);
+                const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`);
                 if (response.ok) {
                   alert("Message sent successfully.");
                 } else {
